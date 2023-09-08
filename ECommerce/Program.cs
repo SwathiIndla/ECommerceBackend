@@ -1,7 +1,8 @@
-using ECommerce;
 using ECommerce.DbContext;
 using ECommerce.Repository;
 using ECommerce.Services;
+using ECommerce_WebAPI;
+using ECommerce_WebAPI.DbContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;

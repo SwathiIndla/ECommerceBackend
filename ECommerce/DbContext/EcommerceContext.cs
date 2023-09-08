@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ECommerce.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace ECommerce;
+namespace ECommerce_WebAPI.DbContext;
 
 public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 {
