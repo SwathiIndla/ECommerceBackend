@@ -1,7 +1,6 @@
-﻿using ECommerce.Models.Domain;
+﻿using ECommerce.DbContext;
+using ECommerce.Models.Domain;
 using ECommerce.Repository;
-using ECommerce_WebAPI;
-using ECommerce_WebAPI.DbContext;
 
 namespace ECommerce.Services
 {

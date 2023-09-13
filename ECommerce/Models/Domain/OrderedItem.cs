@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace ECommerce.Models.Domain;
 
-public partial class OrderLine
+public partial class OrderedItem
 {
-    public Guid OrderLineId { get; set; }
+    public Guid OrderedItemId { get; set; }
 
     public Guid ProductItemId { get; set; }
 

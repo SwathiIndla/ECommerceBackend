@@ -15,3 +15,4 @@ public partial class PropertyValue
 
     public virtual PropertyName PropertyName { get; set; } = null!;
 }
+

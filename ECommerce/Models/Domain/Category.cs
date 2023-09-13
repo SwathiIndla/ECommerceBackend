@@ -9,11 +9,13 @@ public partial class Category
 
     public string CategoryName { get; set; } = null!;
 
-    public string? CategoryImgUrl { get; set; }
+    public Guid? ParentCategoryId { get; set; }
 
-    public virtual ICollection<CategoryHierarchy> CategoryHierarchyAncestorCategories { get; set; } = new List<CategoryHierarchy>();
+    public virtual ICollection<BrandCategory> BrandCategories { get; set; } = new List<BrandCategory>();
 
-    public virtual ICollection<CategoryHierarchy> CategoryHierarchyDescendantCategories { get; set; } = new List<CategoryHierarchy>();
+    public virtual ICollection<Category> InverseParentCategory { get; set; } = new List<Category>();
+
+    public virtual Category? ParentCategory { get; set; }
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 

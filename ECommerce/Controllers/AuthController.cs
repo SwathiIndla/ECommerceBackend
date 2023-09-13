@@ -59,9 +59,9 @@ namespace ECommerce.Controllers
                 }
                 return BadRequest(new { Message = localizer["EmptyRoles"].Value });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return BadRequest(new { Error = ex.Message , Details = ex.ToString()});
+                return BadRequest(new { Error = ex.Message, Details = ex.ToString() });
             }
         }
 
@@ -87,9 +87,9 @@ namespace ECommerce.Controllers
                 }
                 return BadRequest(new { Message = localizer["InvalidEmail"].Value });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return BadRequest(new {Error = ex.Message,  Details = ex.ToString()});
+                return BadRequest(new { Error = ex.Message, Details = ex.ToString() });
             }
         }
 

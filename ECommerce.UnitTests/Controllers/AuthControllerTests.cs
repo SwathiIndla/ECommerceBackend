@@ -31,7 +31,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
             fixture.Behaviors.Add(new OmitOnRecursionBehavior(1));
             var userStore = new Mock<IUserStore<IdentityUser>>();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            userManagerMock = new Mock<UserManager<IdentityUser>>(userStore.Object,null, null, null, null, null, null, null, null);
+            userManagerMock = new Mock<UserManager<IdentityUser>>(userStore.Object, null, null, null, null, null, null, null, null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             tokenRepositoryServiceMock = fixture.Freeze<Mock<ITokenRepository>>();
             customerRepositoryServiceMock = fixture.Freeze<Mock<ICustomerRepository>>();
@@ -79,7 +79,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
         public async Task Signup_ShouldReturnBadRequest_WhenProvidedDetailsAreNotValid()
         {
             var registerRequestDto = fixture.Create<RegisterRequestDto>();
-            userManagerMock.Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Email already in use"}));
+            userManagerMock.Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Email already in use" }));
             localizerMock.Setup(loc => loc["UserRegistrationFailure"]).Returns(new LocalizedString("UserRegistrationFailure", "Unable to register user. Please go through the Error for details."));
 
             var result = await sut.Signup(registerRequestDto).ConfigureAwait(false);
@@ -94,7 +94,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
         {
             var registerRequestDto = fixture.Create<RegisterRequestDto>();
             userManagerMock.Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
-            userManagerMock.Setup(x => x.AddToRolesAsync(It.IsAny<IdentityUser>(), It.IsAny<string[]>())).ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Adding Roles Failed. Try registering once again"}));
+            userManagerMock.Setup(x => x.AddToRolesAsync(It.IsAny<IdentityUser>(), It.IsAny<string[]>())).ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Adding Roles Failed. Try registering once again" }));
             userManagerMock.Setup(x => x.DeleteAsync(It.IsAny<IdentityUser>())).ReturnsAsync(IdentityResult.Success);
             localizerMock.Setup(loc => loc["RoleAdditionFailed"]).Returns(new LocalizedString("RoleAdditionFailed", "Failed to add roles to the user. Please try registering again."));
 
@@ -132,7 +132,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
             userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
             userManagerMock.Setup(x => x.CheckPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).ReturnsAsync(true);
             userManagerMock.Setup(x => x.GetRolesAsync(It.IsAny<IdentityUser>())).ReturnsAsync(roles);
-            tokenRepositoryServiceMock.Setup(x => x.CreateJwtToken(It.IsAny<IdentityUser>(),It.IsAny<List<string>>())).Returns(jwtToken);
+            tokenRepositoryServiceMock.Setup(x => x.CreateJwtToken(It.IsAny<IdentityUser>(), It.IsAny<List<string>>())).Returns(jwtToken);
 
             var result = await sut.Login(loginRequestDto).ConfigureAwait(false);
 
@@ -182,7 +182,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
         {
             var loginRequestDto = fixture.Create<LoginRequestDto>();
             userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).Throws<Exception>();
-            
+
             var result = await sut.Login(loginRequestDto).ConfigureAwait(false);
 
             Assert.IsType<BadRequestObjectResult>(result);

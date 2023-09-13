@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ECommerce.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace ECommerce_WebAPI.DbContext;
+namespace ECommerce.DbContext;
 
 public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 {
@@ -18,23 +18,19 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 
     public virtual DbSet<Address> Addresses { get; set; }
 
+    public virtual DbSet<Brand> Brands { get; set; }
+
+    public virtual DbSet<BrandCategory> BrandCategories { get; set; }
+
     public virtual DbSet<Cart> Carts { get; set; }
 
     public virtual DbSet<CartProductItem> CartProductItems { get; set; }
 
     public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<CategoryHierarchy> CategoryHierarchies { get; set; }
-
-    public virtual DbSet<CustomerAddress> CustomerAddresses { get; set; }
-
     public virtual DbSet<CustomerCredential> CustomerCredentials { get; set; }
 
-    public virtual DbSet<OrderLine> OrderLines { get; set; }
-
-    public virtual DbSet<OrderStatus> OrderStatuses { get; set; }
-
-    public virtual DbSet<OrderType> OrderTypes { get; set; }
+    public virtual DbSet<OrderedItem> OrderedItems { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
 
@@ -75,9 +71,11 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
             entity.Property(e => e.Country)
                 .HasMaxLength(100)
                 .HasColumnName("country");
+            entity.Property(e => e.CustomerId).HasColumnName("customer_id");
             entity.Property(e => e.CustomerName)
                 .HasMaxLength(255)
                 .HasColumnName("customer_name");
+            entity.Property(e => e.IsDefault).HasColumnName("is_default");
             entity.Property(e => e.PhoneNumber)
                 .HasMaxLength(50)
                 .HasColumnName("phone_number");
@@ -88,6 +86,39 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
                 .HasMaxLength(50)
                 .HasColumnName("state_province");
             entity.Property(e => e.StreetAddress).HasColumnName("street_address");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Addresses)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("FK_Address_CustomerCredential");
+        });
+
+        modelBuilder.Entity<Brand>(entity =>
+        {
+            entity.ToTable("Brand");
+
+            entity.Property(e => e.BrandId)
+                .ValueGeneratedNever()
+                .HasColumnName("brand_id");
+            entity.Property(e => e.BrandName)
+                .HasMaxLength(255)
+                .HasColumnName("brand_name");
+        });
+
+        modelBuilder.Entity<BrandCategory>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.BrandId).HasColumnName("brand_id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+
+            entity.HasOne(d => d.Brand).WithMany(p => p.BrandCategories)
+                .HasForeignKey(d => d.BrandId)
+                .HasConstraintName("FK_BrandCategories_Brand");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.BrandCategories)
+                .HasForeignKey(d => d.CategoryId)
+                .HasConstraintName("FK_BrandCategories_Categories");
         });
 
         modelBuilder.Entity<Cart>(entity =>
@@ -126,60 +157,19 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Categori__D54EE9B4C33017FF");
+            entity.HasIndex(e => e.CategoryName, "IX_Categories").IsUnique();
 
             entity.Property(e => e.CategoryId)
                 .ValueGeneratedNever()
                 .HasColumnName("category_id");
-            entity.Property(e => e.CategoryImgUrl)
-                .HasMaxLength(255)
-                .HasColumnName("category_img_url");
             entity.Property(e => e.CategoryName)
-                .HasMaxLength(255)
+                .HasMaxLength(100)
                 .HasColumnName("category_name");
-        });
+            entity.Property(e => e.ParentCategoryId).HasColumnName("parent_category_id");
 
-        modelBuilder.Entity<CategoryHierarchy>(entity =>
-        {
-            entity.ToTable("CategoryHierarchy");
-
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
-            entity.Property(e => e.AncestorCategoryId).HasColumnName("ancestor_category_id");
-            entity.Property(e => e.DescendantCategoryId).HasColumnName("descendant_category_id");
-
-            entity.HasOne(d => d.AncestorCategory).WithMany(p => p.CategoryHierarchyAncestorCategories)
-                .HasForeignKey(d => d.AncestorCategoryId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__CategoryH__ances__5FB337D6");
-
-            entity.HasOne(d => d.DescendantCategory).WithMany(p => p.CategoryHierarchyDescendantCategories)
-                .HasForeignKey(d => d.DescendantCategoryId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__CategoryH__desce__60A75C0F");
-        });
-
-        modelBuilder.Entity<CustomerAddress>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Customer__3213E83F01EFF5D1");
-
-            entity.ToTable("CustomerAddress");
-
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
-            entity.Property(e => e.AddressId).HasColumnName("address_id");
-            entity.Property(e => e.CustomerId).HasColumnName("customer_id");
-            entity.Property(e => e.IsDefault).HasColumnName("is_default");
-
-            entity.HasOne(d => d.Address).WithMany(p => p.CustomerAddresses)
-                .HasForeignKey(d => d.AddressId)
-                .HasConstraintName("FK_CustomerAddress_Address");
-
-            entity.HasOne(d => d.Customer).WithMany(p => p.CustomerAddresses)
-                .HasForeignKey(d => d.CustomerId)
-                .HasConstraintName("FK_CustomerAddress_CustomerCredential");
+            entity.HasOne(d => d.ParentCategory).WithMany(p => p.InverseParentCategory)
+                .HasForeignKey(d => d.ParentCategoryId)
+                .HasConstraintName("FK_Categories_Categories");
         });
 
         modelBuilder.Entity<CustomerCredential>(entity =>
@@ -201,13 +191,15 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
                 .HasColumnName("password");
         });
 
-        modelBuilder.Entity<OrderLine>(entity =>
+        modelBuilder.Entity<OrderedItem>(entity =>
         {
-            entity.ToTable("OrderLine");
+            entity.HasKey(e => e.OrderedItemId).HasName("PK_OrderLine");
 
-            entity.Property(e => e.OrderLineId)
+            entity.ToTable("OrderedItem");
+
+            entity.Property(e => e.OrderedItemId)
                 .ValueGeneratedNever()
-                .HasColumnName("order_line_id");
+                .HasColumnName("ordered_item_id");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(19, 4)")
@@ -215,37 +207,13 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
             entity.Property(e => e.ProductItemId).HasColumnName("product_item_id");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
 
-            entity.HasOne(d => d.Order).WithMany(p => p.OrderLines)
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderedItems)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_OrderLine_ShippingOrder");
 
-            entity.HasOne(d => d.ProductItem).WithMany(p => p.OrderLines)
+            entity.HasOne(d => d.ProductItem).WithMany(p => p.OrderedItems)
                 .HasForeignKey(d => d.ProductItemId)
                 .HasConstraintName("FK_OrderLine_ProductItemDetails");
-        });
-
-        modelBuilder.Entity<OrderStatus>(entity =>
-        {
-            entity.ToTable("OrderStatus");
-
-            entity.Property(e => e.OrderStatusId)
-                .ValueGeneratedNever()
-                .HasColumnName("order_status_id");
-            entity.Property(e => e.OrderStatus1)
-                .HasMaxLength(50)
-                .HasColumnName("order_status");
-        });
-
-        modelBuilder.Entity<OrderType>(entity =>
-        {
-            entity.ToTable("OrderType");
-
-            entity.Property(e => e.OrderTypeId)
-                .ValueGeneratedNever()
-                .HasColumnName("order_type_id");
-            entity.Property(e => e.OrderType1)
-                .HasMaxLength(50)
-                .HasColumnName("order_type");
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -255,14 +223,16 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
             entity.Property(e => e.ProductId)
                 .ValueGeneratedNever()
                 .HasColumnName("product_id");
+            entity.Property(e => e.BrandId).HasColumnName("brand_id");
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.ProductDescription).HasColumnName("product_description");
-            entity.Property(e => e.ProductImage)
-                .HasMaxLength(255)
-                .HasColumnName("product_image");
             entity.Property(e => e.ProductName)
                 .HasMaxLength(255)
                 .HasColumnName("product_name");
+
+            entity.HasOne(d => d.Brand).WithMany(p => p.Products)
+                .HasForeignKey(d => d.BrandId)
+                .HasConstraintName("FK_Products_Brand");
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
@@ -302,6 +272,7 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
                 .HasColumnType("decimal(19, 4)")
                 .HasColumnName("price");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ProductItemImage).HasColumnName("product_item_image");
             entity.Property(e => e.QtyInStock).HasColumnName("qty_in_stock");
             entity.Property(e => e.Sku)
                 .HasMaxLength(255)
@@ -343,8 +314,6 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 
             entity.ToTable("PropertyName");
 
-            entity.HasIndex(e => e.PropertyName1, "IX_PropertiesName").IsUnique();
-
             entity.Property(e => e.PropertyId)
                 .ValueGeneratedNever()
                 .HasColumnName("property_id");
@@ -355,14 +324,12 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 
             entity.HasOne(d => d.Category).WithMany(p => p.PropertyNames)
                 .HasForeignKey(d => d.CategoryId)
-                .HasConstraintName("FK_PropertiesName_Categories");
+                .HasConstraintName("FK_PropertyName_Categories");
         });
 
         modelBuilder.Entity<PropertyValue>(entity =>
         {
             entity.HasKey(e => e.PropertyValueId).HasName("PK_PropertyValue");
-
-            entity.HasIndex(e => e.PropertyValue1, "IX_PropertyValue").IsUnique();
 
             entity.Property(e => e.PropertyValueId)
                 .ValueGeneratedNever()
@@ -370,6 +337,7 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
             entity.Property(e => e.PropertyNameId).HasColumnName("property_name_id");
             entity.Property(e => e.PropertyValue1)
                 .HasMaxLength(255)
+                .IsUnicode(false)
                 .HasColumnName("property_value");
 
             entity.HasOne(d => d.PropertyName).WithMany(p => p.PropertyValues)
@@ -387,29 +355,16 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("order_id");
             entity.Property(e => e.CustomerId).HasColumnName("customer_id");
-            entity.Property(e => e.OrderDate)
-                .HasColumnType("datetime")
-                .HasColumnName("order_date");
-            entity.Property(e => e.OrderStatusId).HasColumnName("order_status_id");
-            entity.Property(e => e.OrderTotal)
-                .HasColumnType("decimal(19, 4)")
-                .HasColumnName("order_total");
-            entity.Property(e => e.OrderTypeId).HasColumnName("order_type_id");
+            entity.Property(e => e.OrderDate).HasColumnName("order_date");
+            entity.Property(e => e.OrderStatus)
+                .HasMaxLength(100)
+                .HasDefaultValueSql("(N'Ordered')")
+                .HasColumnName("order_status");
             entity.Property(e => e.ShippingAddress).HasColumnName("shipping_address");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.ShippingOrders)
                 .HasForeignKey(d => d.CustomerId)
                 .HasConstraintName("FK_ShippingOrder_CustomerCredential");
-
-            entity.HasOne(d => d.OrderStatus).WithMany(p => p.ShippingOrders)
-                .HasForeignKey(d => d.OrderStatusId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_ShippingOrder_OrderStatus");
-
-            entity.HasOne(d => d.OrderType).WithMany(p => p.ShippingOrders)
-                .HasForeignKey(d => d.OrderTypeId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_ShippingOrder_OrderType");
         });
 
         OnModelCreatingPartial(modelBuilder);

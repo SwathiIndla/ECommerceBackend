@@ -13,17 +13,10 @@ public partial class ShippingOrder
 
     public DateTime OrderDate { get; set; }
 
-    public Guid? OrderStatusId { get; set; }
-
-    public Guid? OrderTypeId { get; set; }
-
-    public decimal OrderTotal { get; set; }
+    public string OrderStatus { get; set; } = null!;
 
     public virtual CustomerCredential Customer { get; set; } = null!;
 
-    public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
-
-    public virtual OrderStatus? OrderStatus { get; set; }
-
-    public virtual OrderType? OrderType { get; set; }
+    public virtual ICollection<OrderedItem> OrderedItems { get; set; } = new List<OrderedItem>();
 }
+

@@ -11,9 +11,9 @@ public partial class CustomerCredential
 
     public string Password { get; set; } = null!;
 
-    public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
+    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
-    public virtual ICollection<CustomerAddress> CustomerAddresses { get; set; } = new List<CustomerAddress>();
+    public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
 
     public virtual ICollection<ProductItemReview> ProductItemReviews { get; set; } = new List<ProductItemReview>();
 

@@ -15,9 +15,11 @@ public partial class ProductItemDetail
 
     public decimal Price { get; set; }
 
+    public string? ProductItemImage { get; set; }
+
     public virtual ICollection<CartProductItem> CartProductItems { get; set; } = new List<CartProductItem>();
 
-    public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
+    public virtual ICollection<OrderedItem> OrderedItems { get; set; } = new List<OrderedItem>();
 
     public virtual Product Product { get; set; } = null!;
 

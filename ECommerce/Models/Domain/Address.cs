@@ -23,5 +23,9 @@ public partial class Address
 
     public string AddressType { get; set; } = null!;
 
-    public virtual ICollection<CustomerAddress> CustomerAddresses { get; set; } = new List<CustomerAddress>();
+    public bool IsDefault { get; set; }
+
+    public Guid CustomerId { get; set; }
+
+    public virtual CustomerCredential Customer { get; set; } = null!;
 }

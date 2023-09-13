@@ -1,8 +1,7 @@
 using ECommerce.DbContext;
+using ECommerce.Mappings;
 using ECommerce.Repository;
 using ECommerce.Services;
-using ECommerce_WebAPI;
-using ECommerce_WebAPI.DbContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -41,6 +40,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("ECommerceDbConne
 
 builder.Services.AddScoped<ITokenRepository,TokenRepositoryService>();
 builder.Services.AddScoped<ICustomerRepository,CustomerRepositoryService>();
+builder.Services.AddScoped<IAdminRepository, AdminRepositoryService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -70,6 +70,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 1;
 });
+
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 var app = builder.Build();
 
