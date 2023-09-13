@@ -46,10 +46,7 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 
     public virtual DbSet<ShippingOrder> ShippingOrders { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseLazyLoadingProxies();
-    }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

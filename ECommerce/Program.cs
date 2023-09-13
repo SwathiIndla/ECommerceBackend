@@ -1,3 +1,4 @@
+using ECommerce.CustomSerializer;
 using ECommerce.DbContext;
 using ECommerce.Mappings;
 using ECommerce.Repository;
@@ -11,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +30,11 @@ builder.Services.Configure<RequestLocalizationOptions>(
         options.SupportedUICultures = supportedCultures;
     });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options => {
+    options.JsonSerializerOptions.Converters.Add(new CategoryDtoConverter());
+    options.JsonSerializerOptions.Converters.Add(new CategoryDtoListConverter());
+    options.JsonSerializerOptions.WriteIndented = true;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -41,6 +47,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("ECommerceDbConne
 builder.Services.AddScoped<ITokenRepository,TokenRepositoryService>();
 builder.Services.AddScoped<ICustomerRepository,CustomerRepositoryService>();
 builder.Services.AddScoped<IAdminRepository, AdminRepositoryService>();
+builder.Services.AddScoped<ICategoriesRepository, CategoriesRepositoryService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
