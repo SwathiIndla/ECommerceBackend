@@ -35,11 +35,5 @@ namespace ECommerce.Controllers
             var propertiesDto = mapper.Map<List<PropertyNameValueDto>>(propertiesDomain);
             return Ok(propertiesDto);
         }
-
-        [HttpGet("filter")]
-        public async Task<IActionResult> FilterProducts()
-        {
-            return Ok();
-        }
     }
 }
