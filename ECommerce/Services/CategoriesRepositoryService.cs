@@ -14,6 +14,11 @@ namespace ECommerce.Services
             this.dbContext = dbContext;
         }
 
+        public async Task<List<Brand>> GetBrandsAsync(Guid categoryId)
+        {
+            return await dbContext.BrandCategories.Where(brandCategory => brandCategory.CategoryId ==  categoryId).Select(brand => brand.Brand).ToListAsync();
+        }
+
         public async Task<List<Category>> GetCategoryHierarchyAsync()
         {
             return await dbContext.Categories.Where(x => x.ParentCategoryId == null).Include(x => x.InverseParentCategory).ToListAsync();
@@ -23,5 +28,7 @@ namespace ECommerce.Services
         {
             return await dbContext.PropertyNames.Where(x => x.CategoryId == categoryId).Include(x => x.PropertyValues).ToListAsync();
         }
+
+
     }
 }

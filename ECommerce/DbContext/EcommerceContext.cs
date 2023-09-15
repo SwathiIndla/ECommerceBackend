@@ -270,6 +270,7 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
                 .HasColumnName("price");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ProductItemImage).HasColumnName("product_item_image");
+            entity.Property(e => e.ProductItemName).HasColumnName("product_item_name");
             entity.Property(e => e.QtyInStock).HasColumnName("qty_in_stock");
             entity.Property(e => e.Sku)
                 .HasMaxLength(255)
@@ -340,6 +341,31 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
             entity.HasOne(d => d.PropertyName).WithMany(p => p.PropertyValues)
                 .HasForeignKey(d => d.PropertyNameId)
                 .HasConstraintName("FK_PropertyValue_PropertiesName");
+        });
+
+        modelBuilder.Entity<Seller>(entity =>
+        {
+            entity.Property(e => e.SellerId)
+                .ValueGeneratedNever()
+                .HasColumnName("seller_id");
+            entity.Property(e => e.SellerName).HasColumnName("seller_name");
+        });
+
+        modelBuilder.Entity<SellerProductItem>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.ProductItemId).HasColumnName("product_item_id");
+            entity.Property(e => e.SellerId).HasColumnName("seller_id");
+
+            entity.HasOne(d => d.ProductItem).WithMany(p => p.SellerProductItems)
+                .HasForeignKey(d => d.ProductItemId)
+                .HasConstraintName("FK_SellerProductItems_ProductItemDetails");
+
+            entity.HasOne(d => d.Seller).WithMany(p => p.SellerProductItems)
+                .HasForeignKey(d => d.SellerId)
+                .HasConstraintName("FK_SellerProductItems_Sellers");
         });
 
         modelBuilder.Entity<ShippingOrder>(entity =>

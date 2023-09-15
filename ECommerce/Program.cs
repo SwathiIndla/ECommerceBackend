@@ -48,6 +48,7 @@ builder.Services.AddScoped<ITokenRepository,TokenRepositoryService>();
 builder.Services.AddScoped<ICustomerRepository,CustomerRepositoryService>();
 builder.Services.AddScoped<IAdminRepository, AdminRepositoryService>();
 builder.Services.AddScoped<ICategoriesRepository, CategoriesRepositoryService>();
+builder.Services.AddScoped<IProductRepository, ProductRepositoryService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

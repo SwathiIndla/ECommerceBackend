@@ -9,12 +9,12 @@ namespace ECommerce.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesComponentController : ControllerBase
+    public class CategoriesController : ControllerBase
     {
         private readonly ICategoriesRepository categoriesRepositoryService;
         private readonly IMapper mapper;
 
-        public CategoriesComponentController(ICategoriesRepository categoriesRepositoryService, IMapper mapper)
+        public CategoriesController(ICategoriesRepository categoriesRepositoryService, IMapper mapper)
         {
             this.categoriesRepositoryService = categoriesRepositoryService;
             this.mapper = mapper;
@@ -34,6 +34,14 @@ namespace ECommerce.Controllers
             var propertiesDomain = await categoriesRepositoryService.GetPropertiesOfCategoryAsync(categoryId);
             var propertiesDto = mapper.Map<List<PropertyNameValueDto>>(propertiesDomain);
             return Ok(propertiesDto);
+        }
+
+        [HttpGet("brands/{categoryId}")]
+        public async Task<IActionResult> GetBrandsOfCategory([FromRoute] Guid categoryId)
+        {
+            var brands = await categoriesRepositoryService.GetBrandsAsync(categoryId);
+            var brandsDto = mapper.Map<List<BrandDto>>(brands);
+            return Ok(brandsDto);
         }
     }
 }

@@ -20,6 +20,7 @@ namespace ECommerce.Mappings
             CreateMap<PropertyName, PropertyNameValueDto>()
                 .ForMember(x => x.PropertyName, opt => opt.MapFrom(src => src.PropertyName1))
                 .ForMember(x => x.PropertyValues, opt => opt.MapFrom(src => src.PropertyValues)).ReverseMap();
+            CreateMap<Brand, BrandDto>().ReverseMap();
         }
     }
 }

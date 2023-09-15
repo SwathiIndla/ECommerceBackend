@@ -6,5 +6,6 @@ namespace ECommerce.Repository
     {
         Task<List<Category>> GetCategoryHierarchyAsync();
         Task<List<PropertyName>> GetPropertiesOfCategoryAsync(Guid categoryId);
+        Task<List<Brand>> GetBrandsAsync(Guid categoryId);
     }
 }
