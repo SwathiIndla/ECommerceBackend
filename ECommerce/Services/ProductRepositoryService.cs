@@ -1,6 +1,9 @@
-﻿using ECommerce.DbContext;
+﻿using AutoMapper;
+using ECommerce.DbContext;
 using ECommerce.Models.Domain;
+using ECommerce.Models.DTOs;
 using ECommerce.Repository;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client.Extensions.Msal;
 
@@ -9,120 +12,109 @@ namespace ECommerce.Services
     public class ProductRepositoryService : IProductRepository
     {
         private readonly EcommerceContext dbContext;
+        private readonly IMapper mapper;
+        private readonly int pageSize = 20;
 
-        public ProductRepositoryService(EcommerceContext dbContext)
+        public ProductRepositoryService(EcommerceContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
+            this.mapper = mapper;
         }
 
-        public IQueryable<ProductItemDetail> SearchProductItem(IQueryable<ProductItemDetail> query, string? search)
+        public async Task<Dictionary<Guid, List<ProductItemCardDto>>> SearchProductItem(string search)
         {
-            return string.IsNullOrEmpty(search) ? query : query.Where(item => item.ProductItemName.ToLower().Contains(search.ToLower()));
+            var matchingProudcts = new List<ProductItemDetail>();
+            var searchTerms = string.IsNullOrEmpty(search) ? Array.Empty<string>() : search.Split(' ');
+            foreach (var term in searchTerms)
+            {
+                var results = await dbContext.ProductItemDetails
+                    .Include(item => item.Product)
+                    .Include(item => item.Product.ProductItemReviews)
+                    .Include(item => item.ProductItemConfigurations)
+                    .ThenInclude(config => config.PropertyValue)
+                    .ThenInclude(propValue => propValue.PropertyName)
+                    .Include(item => item.Product.Category)
+                    .ThenInclude(category => category.PropertyNames)
+                    .Where(item => item.ProductItemName.Replace(" ", string.Empty).ToLower().Contains(term.ToLower())).ToListAsync();
+                matchingProudcts.AddRange(results);
+            }
+            var uniqueMatchingProducts = matchingProudcts.Distinct().ToList();
+            var ListOfRawProductItemCardDto = mapper.Map<List<RawProductItemCardDto>>(uniqueMatchingProducts);
+            var ListOfProductItemCardDto = mapper.Map<List<ProductItemCardDto>>(ListOfRawProductItemCardDto);
+            var finalProductItemsData = ListOfProductItemCardDto.GroupBy(item => item.CategoryId).ToDictionary(k => k.Key, v => v.ToList());
+            return finalProductItemsData;
         }
 
-        public IQueryable<ProductItemDetail> FilterProductItemOnBrand(IQueryable<ProductItemDetail> query, List<Guid>? brands)
+        public async Task<List<ProductItemCardDto>> FilterMobiles(FilterMobilesDto filterConditions)
         {
-            return brands != null && brands.Count > 0 ? query.Where(item => brands.Contains(item.Product.BrandId)) : query;
-        }
-
-        public object FetchMobileProductItems(string? search = null, List<Guid>? brands = null, List<string>? Colour = null, List<string>? RAM = null, List<string>? Storage = null, List<string>? Battery = null, List<string>? Screen_Size = null, List<string>? Resolution = null, List<string>? Primary_Camera = null, List<string>? Secondary_Camera = null, decimal? minPrice = null, decimal? maxPrice = null, int page = 1, bool sortOnPrice = false, bool sortByPriceAsc = false, bool sortOnRating = true, bool sortByRatingAsc = false)
-        {
-            int pageSize = 10;
             var query = dbContext.ProductItemDetails.AsQueryable();
+            //Filtering mobileproduct items on the brands
+            query = filterConditions.Brands != null && filterConditions.Brands.Any() ? query.Where(item => filterConditions.Brands.Contains(item.Product.BrandId)) : query;
+            //Filtering mobile product items on the colours
+            query = filterConditions.Colour != null && filterConditions.Colour.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Colour) &&
+                filterConditions.Colour.Contains(config.PropertyValue.PropertyValue1))) : query;
+            //Filtering mobile product items on the RAM
+            query = filterConditions.RAM != null && filterConditions.RAM.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.RAM) &&
+                filterConditions.RAM.Contains(config.PropertyValue.PropertyValue1))) : query;
+            //Filtering mobile product items on the storage
+            query = filterConditions.Storage != null && filterConditions.Storage.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Storage) && 
+                filterConditions.Storage.Contains(config.PropertyValue.PropertyValue1))) : query;
+            //Filtering mobile product items on the battery
+            query = filterConditions.Battery != null && filterConditions.Battery.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Battery) && 
+                filterConditions.Battery.Contains(config.PropertyValue.PropertyValue1))) : query;
+            //Filtering mobile product items on the screen size
+            query = filterConditions.Screen_Size != null && filterConditions.Screen_Size.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Screen_Size) && 
+                filterConditions.Screen_Size.Contains(config.PropertyValue.PropertyValue1))) : query;
+            //Filtering mobile product items on the resolution
+            query = filterConditions.Resolution != null && filterConditions.Resolution.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Resolution) && 
+                filterConditions.Resolution.Contains(config.PropertyValue.PropertyValue1))) : query;
+            //Filtering mobile product items on the primary camera
+            query = filterConditions.Primary_Camera != null && filterConditions.Primary_Camera.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Primary_Camera) &&
+                filterConditions.Primary_Camera.Contains(config.PropertyValue.PropertyValue1))) : query;
+            //Filtering mobile product items on the secondary camera
+            query = filterConditions.Secondary_Camera != null && filterConditions.Secondary_Camera.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Secondary_Camera) &&
+                filterConditions.Secondary_Camera.Contains(config.PropertyValue.PropertyValue1))) : query;
+            //Filtering mobile product items on the processor
+            query = filterConditions.Processor != null && filterConditions.Processor.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Processor) &&
+                filterConditions.Processor.Contains(config.PropertyValue.PropertyValue1))) : query;
 
-            if (!string.IsNullOrEmpty(search))
+            query = filterConditions.MinPrice.HasValue ? query.Where(item => item.Price >= filterConditions.MinPrice.Value) : query;
+
+            query = filterConditions.MaxPrice.HasValue ? query.Where(item => item.Price <= filterConditions.MaxPrice.Value) : query;
+            query = query.Include(item => item.Product)
+                    .Include(item => item.Product.ProductItemReviews)
+                    .Include(item => item.ProductItemConfigurations)
+                    .ThenInclude(config => config.PropertyValue)
+                    .ThenInclude(propValue => propValue.PropertyName)
+                    .Include(item => item.Product.Category)
+                    .ThenInclude(category => category.PropertyNames);
+            if (filterConditions.SortOnPrice)
             {
-                query = query.Where(item => item.ProductItemName.ToLower().Contains(search.ToLower()));
+                query = filterConditions.SortByPriceAsc ? query.OrderBy(item => item.Price) : query.OrderByDescending(item => item.Price);
             }
-            if (Colour != null && Colour.Any())
+            if (filterConditions.SortOnRating)
             {
-                query = query.Where(item => item.ProductItemConfigurations.Any(
-                    config => config.PropertyValue.PropertyName.PropertyName1 == "Colour" &&
-                    Colour.Contains(config.PropertyValue.PropertyValue1)));
+                query = query.OrderByDescending(item => item.Product.ProductItemReviews.Average(rating => rating.Rating));
             }
-            if (RAM != null && RAM.Any())
-            {
-                query = query.Where(item => item.ProductItemConfigurations.Any(
-                    config => config.PropertyValue.PropertyName.PropertyName1 == "RAM" &&
-                    RAM.Contains(config.PropertyValue.PropertyValue1)));
-            }
-            if (Storage != null && Storage.Any())
-            {
-                query = query.Where(item => item.ProductItemConfigurations.Any(
-                    config => config.PropertyValue.PropertyName.PropertyName1 == "Storage" &&
-                    Storage.Contains(config.PropertyValue.PropertyValue1)));
-            }
-            if (Battery != null && Battery.Any())
-            {
-                query = query.Where(item => item.ProductItemConfigurations.Any(
-                    config => config.PropertyValue.PropertyName.PropertyName1 == "Battery" &&
-                    Battery.Contains(config.PropertyValue.PropertyValue1)));
-            }
-            if (Screen_Size != null && Screen_Size.Any())
-            {
-                query = query.Where(item => item.ProductItemConfigurations.Any(
-                    config => config.PropertyValue.PropertyName.PropertyName1 == "Screen_Size" &&
-                    Screen_Size.Contains(config.PropertyValue.PropertyValue1)));
-            }
-            if (Resolution != null && Resolution.Any())
-            {
-                query = query.Where(item => item.ProductItemConfigurations.Any(
-                    config => config.PropertyValue.PropertyName.PropertyName1 == "Resolution" &&
-                    Resolution.Contains(config.PropertyValue.PropertyValue1)));
-            }
-            if (Primary_Camera != null && Primary_Camera.Any())
-            {
-                query = query.Where(item => item.ProductItemConfigurations.Any(
-                    config => config.PropertyValue.PropertyName.PropertyName1 == "Primary_Camera" &&
-                    Primary_Camera.Contains(config.PropertyValue.PropertyValue1)));
-            }
-            if (Secondary_Camera != null && Secondary_Camera.Any())
-            {
-                query = query.Where(item => item.ProductItemConfigurations.Any(
-                    config => config.PropertyValue.PropertyName.PropertyName1 == "Secondary_Camera" &&
-                    Secondary_Camera.Contains(config.PropertyValue.PropertyValue1)));
-            }
-            if (minPrice.HasValue)
-            {
-                query = query.Where(item => item.Price >= minPrice.Value);
-            }
-            if (maxPrice.HasValue)
-            {
-                query = query.Where(item => item.Price <= maxPrice.Value);
-            }
-            var initialDetails = query.Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(
-                item => new
-                {
-                    item.ProductItemId,
-                    item.ProductId,
-                    item.QtyInStock,
-                    item.Sku,
-                    item.Price,
-                    item.ProductItemImage,
-                    Properties = dbContext.PropertyNames
-                    .Where(propName => propName.CategoryId == item.Product.CategoryId)
-                    .Select(propName => new
-                    {
-                        Name = propName.PropertyName1,
-                        Value = item.ProductItemConfigurations
-                        .Where(config => config.PropertyValue.PropertyName.PropertyId == propName.PropertyId)
-                        .Select(config => config.PropertyValue.PropertyValue1)
-                        .FirstOrDefault()
-                    }).AsEnumerable()
-                }).AsEnumerable();
-            var result = initialDetails.Select(item => new
-            {
-                item.ProductItemId,
-                item.ProductId,
-                item.QtyInStock,
-                item.Sku,
-                item.Price,
-                item.ProductItemImage,
-                specifications = item.Properties.ToDictionary(prop => prop.Name, prop => prop.Value)
-            }).ToList();
-            return result;
+            var filteredResults = await query.Skip((filterConditions.Page - 1)*pageSize).Take(pageSize).ToListAsync();
+            var rawProductItemDtoCard = mapper.Map<List<RawProductItemCardDto>>(filteredResults);
+            var productItemDtoCard = mapper.Map<List<ProductItemCardDto>>(rawProductItemDtoCard);
+            
+            return productItemDtoCard;
+        }
+
+        public Task<object> GetDetailedProductItem(Guid productItemId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
