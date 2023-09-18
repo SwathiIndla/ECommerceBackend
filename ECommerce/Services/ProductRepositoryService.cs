@@ -23,7 +23,7 @@ namespace ECommerce.Services
 
         public async Task<Dictionary<Guid, List<ProductItemCardDto>>> SearchProductItem(string search)
         {
-            var matchingProudcts = new List<ProductItemDetail>();
+            var matchingProducts = new List<ProductItemDetail>();
             var searchTerms = string.IsNullOrEmpty(search) ? Array.Empty<string>() : search.Split(' ');
             foreach (var term in searchTerms)
             {
@@ -36,19 +36,19 @@ namespace ECommerce.Services
                     .Include(item => item.Product.Category)
                     .ThenInclude(category => category.PropertyNames)
                     .Where(item => item.ProductItemName.Replace(" ", string.Empty).ToLower().Contains(term.ToLower())).ToListAsync();
-                matchingProudcts.AddRange(results);
+                matchingProducts.AddRange(results);
             }
-            var uniqueMatchingProducts = matchingProudcts.Distinct().ToList();
+            var uniqueMatchingProducts = matchingProducts.Distinct().ToList();
             var ListOfRawProductItemCardDto = mapper.Map<List<RawProductItemCardDto>>(uniqueMatchingProducts);
             var ListOfProductItemCardDto = mapper.Map<List<ProductItemCardDto>>(ListOfRawProductItemCardDto);
             var finalProductItemsData = ListOfProductItemCardDto.GroupBy(item => item.CategoryId).ToDictionary(k => k.Key, v => v.ToList());
             return finalProductItemsData;
         }
 
-        public async Task<List<ProductItemCardDto>> FilterMobiles(FilterMobilesDto filterConditions)
+        public async Task<List<ProductItemCardDto>> FilterMobiles(FilterMobilesQueryParameters filterConditions)
         {
             var query = dbContext.ProductItemDetails.AsQueryable();
-            //Filtering mobileproduct items on the brands
+            //Filtering mobile product items on the brands
             query = filterConditions.Brands != null && filterConditions.Brands.Any() ? query.Where(item => filterConditions.Brands.Contains(item.Product.BrandId)) : query;
             //Filtering mobile product items on the colours
             query = filterConditions.Colour != null && filterConditions.Colour.Any() ? query.Where(item => item.ProductItemConfigurations.Any(

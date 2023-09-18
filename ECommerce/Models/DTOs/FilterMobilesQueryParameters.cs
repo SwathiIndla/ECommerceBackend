@@ -2,7 +2,7 @@
 
 namespace ECommerce.Models.DTOs
 {
-    public class FilterMobilesDto
+    public class FilterMobilesQueryParameters
     {
         public List<Guid>? Brands { get; set; } = null;
         public List<string>? Colour { get; set; } = null;
