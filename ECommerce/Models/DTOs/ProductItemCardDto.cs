@@ -9,6 +9,7 @@
         public decimal Price { get; set; }
         public string? ProductItemImage { get; set; }
         public string ProductItemName { get; set; } = null!;
+        public string ProductItemDescription { get; set; } = null!;
         public decimal Rating { get; set; }
         public int NumberOfRatings { get; set; }
         public int NumberOfReviews { get; set; }

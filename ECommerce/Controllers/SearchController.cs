@@ -20,10 +20,10 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchProducts([FromQuery] string? search = null)
+        public async Task<IActionResult> SearchProducts([FromQuery] SortProductsDto sortConditions, [FromQuery] string? search = null, [FromQuery] int page = 1)
         {
-            var searchResults = !string.IsNullOrEmpty(search) ? await productRepositoryService.SearchProductItem(search) : new Dictionary<Guid, List<ProductItemCardDto>>();
-            return  searchResults.Count > 0 ? Ok(searchResults) : NotFound();
+            var searchResults = !string.IsNullOrEmpty(search) ? await productRepositoryService.SearchProductItem(search, page, sortConditions) : new PaginatedSearchResultsDto();
+            return  searchResults.TotalSearchResults > 0 ? Ok(searchResults) : NotFound();
         }
     }
 }

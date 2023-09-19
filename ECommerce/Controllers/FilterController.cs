@@ -17,11 +17,11 @@ namespace ECommerce.Controllers
             this.productRepositoryService = productRepositoryService;
         }
 
-        [HttpGet("mobiles")]
-        public async Task<IActionResult> GetMobilesProductCards([FromQuery] FilterMobilesDto filterConditions)
+        [HttpGet]
+        public async Task<IActionResult> GetProductCards([FromQuery] FilterProductsQueryParametersDto filterConditions, [FromQuery] SortProductsDto sortConditions)
         {
-            var productItems = await productRepositoryService.FilterMobiles(filterConditions);
-            return productItems.Count > 0 ? Ok(productItems) : NotFound();
+            var productItems = await productRepositoryService.FilterProducts(filterConditions, sortConditions);
+            return productItems.TotalFilterResults > 0 ? Ok(productItems) : NotFound();
         }
     }
 }

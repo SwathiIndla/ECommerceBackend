@@ -2,7 +2,7 @@
 
 namespace ECommerce.Models.DTOs
 {
-    public class FilterMobilesQueryParameters
+    public class FilterProductsQueryParametersDto
     {
         public List<Guid>? Brands { get; set; } = null;
         public List<string>? Colour { get; set; } = null;
@@ -17,8 +17,5 @@ namespace ECommerce.Models.DTOs
         public decimal? MinPrice { get; set; } = null;
         public decimal? MaxPrice { get; set; } = null;
         public int Page { get; set; } = 1;
-        public bool SortOnPrice { get; set; } = false;
-        public bool SortByPriceAsc { get; set; } = true;
-        public bool SortOnRating { get; set; } = true;
     }
 }

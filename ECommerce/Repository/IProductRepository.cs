@@ -5,8 +5,9 @@ namespace ECommerce.Repository
 {
     public interface IProductRepository
     {
-        Task<Dictionary<Guid, List<ProductItemCardDto>>> SearchProductItem(string search);
-        Task<List<ProductItemCardDto>> FilterMobiles(FilterMobilesQueryParameters filterConditions);
-        Task<object> GetDetailedProductItem(Guid productItemId);
+        Task<PaginatedSearchResultsDto> SearchProductItem(string search, int page, SortProductsDto sortConditions);
+        Task<PaginatedFilterResults> FilterProducts(FilterProductsQueryParametersDto filterConditions, SortProductsDto sortConditions);
+        Task<ProductItemDetailedPageDto?> GetDetailedProductItem(Guid productItemId);
+        Task<ProductVariantDetailedPageDto> FilterProductVariant(Guid productId, FilterVariantParametersDto filterConditions, List<string> featuresDataNeeded);
     }
 }
