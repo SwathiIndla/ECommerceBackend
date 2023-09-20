@@ -1,4 +1,6 @@
-﻿namespace ECommerce.Models.DTOs
+﻿using ECommerce.Models.Domain;
+
+namespace ECommerce.Models.DTOs
 {
     public class ProductItemCardDto
     {
@@ -14,5 +16,6 @@
         public int NumberOfRatings { get; set; }
         public int NumberOfReviews { get; set; }
         public Dictionary<string, string> Specifications { get; set; } = null!;
+        public List<SellerDetailsDto>? Sellers { get; set; }
     }
 }

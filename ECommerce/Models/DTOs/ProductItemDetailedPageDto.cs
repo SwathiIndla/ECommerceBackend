@@ -1,4 +1,6 @@
-﻿namespace ECommerce.Models.DTOs
+﻿using ECommerce.Models.Domain;
+
+namespace ECommerce.Models.DTOs
 {
     public class ProductItemDetailedPageDto
     {

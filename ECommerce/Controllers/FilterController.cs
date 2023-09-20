@@ -17,10 +17,10 @@ namespace ECommerce.Controllers
             this.productRepositoryService = productRepositoryService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetProductCards([FromQuery] FilterProductsQueryParametersDto filterConditions, [FromQuery] SortProductsDto sortConditions)
+        [HttpGet("{categoryId}")]
+        public async Task<IActionResult> GetProductCards([FromRoute] Guid categoryId ,[FromQuery] FilterProductsQueryParametersDto filterConditions, [FromQuery] SortProductsDto sortConditions)
         {
-            var productItems = await productRepositoryService.FilterProducts(filterConditions, sortConditions);
+            var productItems = await productRepositoryService.FilterProducts(categoryId, filterConditions, sortConditions);
             return productItems.TotalFilterResults > 0 ? Ok(productItems) : NotFound();
         }
     }

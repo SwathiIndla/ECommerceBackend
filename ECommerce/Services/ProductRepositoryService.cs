@@ -5,6 +5,7 @@ using ECommerce.Models.DTOs;
 using ECommerce.Repository;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Identity.Client.Extensions.Msal;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -28,14 +29,11 @@ namespace ECommerce.Services
             var searchTerms = string.IsNullOrEmpty(search) ? Array.Empty<string>() : search.Split(' ');
             foreach (var term in searchTerms)
             {
-                var results = await dbContext.ProductItemDetails
-                    .Include(item => item.Product)
+                var results = await dbContext.ProductItemDetails.Include(item => item.Product)
                     .Include(item => item.Product.ProductItemReviews)
-                    .Include(item => item.ProductItemConfigurations)
-                    .ThenInclude(config => config.PropertyValue)
-                    .ThenInclude(propValue => propValue.PropertyName)
-                    .Include(item => item.Product.Category)
-                    .ThenInclude(category => category.PropertyNames)
+                    .Include(item => item.SellerProductItems).ThenInclude(sellerProduct => sellerProduct.Seller)
+                    .Include(item => item.ProductItemConfigurations).ThenInclude(config => config.PropertyValue).ThenInclude(propValue => propValue.PropertyName)
+                    .Include(item => item.Product.Category).ThenInclude(category => category.PropertyNames)
                     .Where(item => item.ProductItemName.Replace(" ", string.Empty).ToLower().Contains(term.ToLower())).ToListAsync();
                 matchingProducts.AddRange(results);
             }
@@ -58,9 +56,9 @@ namespace ECommerce.Services
             return finalSearchResult;
         }
 
-        public async Task<PaginatedFilterResults> FilterProducts(FilterProductsQueryParametersDto filterConditions, SortProductsDto sortConditions)
+        public async Task<PaginatedFilterResults> FilterProducts(Guid categoryId, FilterProductsQueryParametersDto filterConditions, SortProductsDto sortConditions)
         {
-            var query = dbContext.ProductItemDetails.AsQueryable();
+            var query = dbContext.ProductItemDetails.Include(item => item.Product).Where(item => item.Product.CategoryId == categoryId).AsQueryable();
             //Filtering product items on the brands
             query = filterConditions.Brands != null && filterConditions.Brands.Any() ? query.Where(item => filterConditions.Brands.Contains(item.Product.BrandId)) : query;
             //Filtering product items on the colours
@@ -103,13 +101,10 @@ namespace ECommerce.Services
             query = filterConditions.MinPrice.HasValue ? query.Where(item => item.Price >= filterConditions.MinPrice.Value) : query;
 
             query = filterConditions.MaxPrice.HasValue ? query.Where(item => item.Price <= filterConditions.MaxPrice.Value) : query;
-            query = query.Include(item => item.Product)
-                    .Include(item => item.Product.ProductItemReviews)
-                    .Include(item => item.ProductItemConfigurations)
-                    .ThenInclude(config => config.PropertyValue)
-                    .ThenInclude(propValue => propValue.PropertyName)
-                    .Include(item => item.Product.Category)
-                    .ThenInclude(category => category.PropertyNames);
+            query = query.Include(item => item.Product.ProductItemReviews)
+                    .Include(item => item.SellerProductItems).ThenInclude(sellerProduct => sellerProduct.Seller)
+                    .Include(item => item.ProductItemConfigurations).ThenInclude(config => config.PropertyValue).ThenInclude(propValue => propValue.PropertyName)
+                    .Include(item => item.Product.Category).ThenInclude(category => category.PropertyNames);
             if (sortConditions.SortOnPrice)
             {
                 query = sortConditions.SortByPriceAsc ? query.OrderBy(item => item.Price) : query.OrderByDescending(item => item.Price);
@@ -133,14 +128,12 @@ namespace ECommerce.Services
 
         public async Task<ProductItemDetailedPageDto?> GetDetailedProductItem(Guid productItemId)
         {
-            var query = dbContext.ProductItemDetails.Include(item => item.Product)
+            var productItem = await dbContext.ProductItemDetails.Include(item => item.Product)
+                    .Include(item => item.SellerProductItems).ThenInclude(sellerProduct => sellerProduct.Seller)
                     .Include(item => item.Product.ProductItemReviews)
-                    .Include(item => item.ProductItemConfigurations)
-                    .ThenInclude(config => config.PropertyValue)
-                    .ThenInclude(propValue => propValue.PropertyName)
-                    .Include(item => item.Product.Category)
-                    .ThenInclude(category => category.PropertyNames); ;
-            var productItem = await query.FirstOrDefaultAsync(item => item.ProductItemId == productItemId);
+                    .Include(item => item.ProductItemConfigurations).ThenInclude(config => config.PropertyValue).ThenInclude(propValue => propValue.PropertyName)
+                    .Include(item => item.Product.Category).ThenInclude(category => category.PropertyNames).
+                    FirstOrDefaultAsync(item => item.ProductItemId == productItemId);
             var productDescriptionWithVariants = productItem != null ? new ProductItemDetailedPageDto
             {
                 ProductItemDetails = mapper.Map<ProductItemCardDto>(productItem),
@@ -161,11 +154,9 @@ namespace ECommerce.Services
             var query = dbContext.ProductItemDetails.Where(item => item.ProductId == productId);
             query = query.Include(item => item.Product)
                 .Include(item => item.Product.ProductItemReviews)
-                .Include(item => item.ProductItemConfigurations)
-                .ThenInclude(config => config.PropertyValue)
-                .ThenInclude(value => value.PropertyName)
-                .Include(item => item.Product.Category)
-                .ThenInclude(category => category.PropertyNames);
+                .Include(item => item.SellerProductItems).ThenInclude(sellerProduct => sellerProduct.Seller)
+                .Include(item => item.ProductItemConfigurations).ThenInclude(config => config.PropertyValue).ThenInclude(value => value.PropertyName)
+                .Include(item => item.Product.Category).ThenInclude(category => category.PropertyNames);
             query = !string.IsNullOrEmpty(filterConditions.Colour) ? query.Where(item => item.ProductItemConfigurations.Any(
                 config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Colour) &&
                 config.PropertyValue.PropertyValue1 == filterConditions.Colour)) : query;

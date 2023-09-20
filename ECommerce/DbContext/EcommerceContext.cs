@@ -44,6 +44,10 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 
     public virtual DbSet<PropertyValue> PropertyValues { get; set; }
 
+    public virtual DbSet<Seller> Sellers { get; set; }
+
+    public virtual DbSet<SellerProductItem> SellerProductItems { get; set; }
+
     public virtual DbSet<ShippingOrder> ShippingOrders { get; set; }
 
     
