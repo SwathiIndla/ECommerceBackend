@@ -25,7 +25,7 @@ namespace ECommerce.Mappings
                 .ForMember(x => x.CategoryId, opt => opt.MapFrom(src => src.Product.CategoryId))
                 .ForMember(x => x.ProductItemDescription, opt => opt.MapFrom(src => src.Product.ProductDescription))
                 .ForMember(x => x.Sellers, opt => opt.MapFrom(src => src.SellerProductItems.Select(sellerProducts =>new SellerDetailsDto {SellerId = sellerProducts.Seller.SellerId, SellerName = sellerProducts.Seller.SellerName }).ToList()))
-                .ForMember(x => x.Rating, opt => opt.MapFrom(src => src.Product.ProductItemReviews.Average(product => product.Rating)))
+                .ForMember(x => x.Rating, opt => opt.MapFrom(src => src.Product.ProductItemReviews.Count == 0 ? 0 : src.Product.ProductItemReviews.Average(product => product.Rating)))
                 .ForMember(x => x.NumberOfRatings, opt => opt.MapFrom(src => src.Product.ProductItemReviews.Count))
                 .ForMember(x => x.NumberOfReviews, opt => opt.MapFrom(src => src.Product.ProductItemReviews.Count(product => product.Review != null)))
                 .ForMember(x => x.Specifications, opt => opt.MapFrom(src => src.Product.Category.PropertyNames

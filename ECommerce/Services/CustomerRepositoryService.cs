@@ -20,9 +20,30 @@ namespace ECommerce.Services
 
         public async Task<AddressDto> AddAddressToCustomer(AddAddressRequestDto addressDto)
         {
-            var addressDomain = mapper.Map<Address>(addressDto);
-            await dbContext.Addresses.AddAsync(addressDomain);
-            await dbContext.SaveChangesAsync();
+            var user = await dbContext.CustomerCredentials.FirstOrDefaultAsync(customer => customer.CustomerId == addressDto.CustomerId);
+            Address? addressDomain = null;
+            if (user != null)
+            {
+                var ListOfAddresses = await dbContext.Addresses.Where(address => address.CustomerId == addressDto.CustomerId).ToListAsync();
+                addressDomain = mapper.Map<Address>(addressDto);
+                addressDomain.AddressId = Guid.NewGuid();
+                if (ListOfAddresses.Count == 0)
+                {
+                    addressDomain.IsDefault = true;
+                }
+                else
+                {
+                    if (addressDto.IsDefault)
+                    {
+                        foreach (var Address in ListOfAddresses)
+                        {
+                            Address.IsDefault = false;
+                        }
+                    }
+                }
+                await dbContext.Addresses.AddAsync(addressDomain);
+                await dbContext.SaveChangesAsync();
+            }
             var newAddress = mapper.Map<AddressDto>(addressDomain);
             return newAddress;
         }
@@ -54,11 +75,45 @@ namespace ECommerce.Services
                 address.Country = addressDto.Country;
                 address.PostalCode = addressDto.PostalCode;
                 address.AddressType = addressDto.AddressType;
-                address.IsDefault = addressDto.IsDefault;
             }
             await dbContext.SaveChangesAsync();
             var updatedAddress = mapper.Map<AddressDto>(address);
             return updatedAddress;
+        }
+
+        public async Task<bool> SetDefaultAddress(Guid addressId)
+        {
+            var address = await dbContext.Addresses.FirstOrDefaultAsync(add => add.AddressId == addressId);
+            var success = false;
+            if (address != null)
+            {
+                address.IsDefault = true; success = true;
+                var addresses = dbContext.Addresses.Where(add => add.CustomerId == address.CustomerId && add.AddressId != addressId).AsEnumerable();
+                foreach (var add in addresses)
+                {
+                    add.IsDefault = false;
+                }
+            }
+            await dbContext.SaveChangesAsync();
+            return success;
+        }
+
+        public async Task<bool> DeleteAddress(Guid addressId)
+        {
+            var address = await dbContext.Addresses.FirstOrDefaultAsync(address => address.AddressId == addressId);
+            var success = false;
+            if (address != null)
+            {
+                if (address.IsDefault)
+                {
+                    var newDefaultAddress = await dbContext.Addresses.FirstOrDefaultAsync(add => add.CustomerId == address.CustomerId && add.AddressId != address.AddressId);
+                    if (newDefaultAddress != null) newDefaultAddress.IsDefault = true;
+                }
+                dbContext.Addresses.Remove(address);
+                await dbContext.SaveChangesAsync();
+                success = true;
+            }
+            return success;
         }
     }
 }

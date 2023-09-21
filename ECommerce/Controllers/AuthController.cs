@@ -94,14 +94,14 @@ namespace ECommerce.Controllers
         }
 
         [HttpPost("find-user")]
-        public async Task<IActionResult> GetUser([FromBody] string email)
+        public async Task<IActionResult> GetUserByEmail([FromBody] string email)
         {
             var user = await userManager.FindByEmailAsync(email);
             return user != null ? Ok() : NotFound();
         }
 
-        [HttpPut("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] LoginRequestDto newDetails)
+        [HttpPut("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] LoginRequestDto newDetails)
         {
             var user = await userManager.FindByEmailAsync(newDetails.Email);
             var resultMessage = "";
@@ -113,7 +113,7 @@ namespace ECommerce.Controllers
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             var result = await userManager.ResetPasswordAsync(user, token, newDetails.Password);
             resultMessage = result.Succeeded ? localizer["PasswordChangeSuccess"].Value : localizer["PasswordChangeFailure"].Value;
-            return result.Succeeded ? Ok(resultMessage) : BadRequest();
+            return result.Succeeded ? Ok(new { Message = resultMessage }) : BadRequest(new { Message = resultMessage });
         }
     }
 }

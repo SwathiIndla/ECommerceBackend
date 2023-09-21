@@ -49,7 +49,7 @@ namespace ECommerce.Services
             }
             var finalSearchResult = new PaginatedSearchResultsDto
             {
-                MultipleCategories = ListOfProductItemCardDto.GroupBy(item => item.CategoryId).ToList().Count == 1 ? false : true,
+                MultipleCategories = ListOfProductItemCardDto.GroupBy(item => item.CategoryId).ToList().Count > 1,
                 TotalSearchResults = ListOfProductItemCardDto.Count,
                 SearchResults = ListOfProductItemCardDto.Skip((page - 1) * pageSize).Take(pageSize).ToList()
             };

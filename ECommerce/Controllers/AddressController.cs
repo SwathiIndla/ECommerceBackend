@@ -30,7 +30,7 @@ namespace ECommerce.Controllers
         public async Task<IActionResult> AddAddress([FromBody] AddAddressRequestDto addressDto)
         {
             var newAddress = await customerRepositoryService.AddAddressToCustomer(addressDto);
-            return Ok(newAddress);
+            return newAddress != null ? Ok(newAddress) : BadRequest();
         }
 
         [HttpPut]
@@ -39,6 +39,22 @@ namespace ECommerce.Controllers
         {
             var updatedAddress = await customerRepositoryService.UpdateAddress(updatedAddressDto);
             return updatedAddress != null ? Ok(updatedAddress) : NotFound();
+        }
+
+        [HttpPut("{addressId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> SetDefaultAddress([FromRoute] Guid addressId)
+        {
+            var success = await customerRepositoryService.SetDefaultAddress(addressId);
+            return success ? Ok() : BadRequest();
+        }
+
+        [HttpDelete("{addressId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> DeleteAddress([FromRoute] Guid addressId)
+        {
+            var success = await customerRepositoryService.DeleteAddress(addressId);
+            return success ? Ok() : BadRequest();
         }
     }
 }

@@ -9,5 +9,7 @@ namespace ECommerce.Repository
         Task<AddressDto> AddAddressToCustomer(AddAddressRequestDto addressDto);
         Task<List<AddressDto>> GetAddressesOfCustomer(Guid customerId);
         Task<AddressDto?> UpdateAddress(AddressDto addressDto);
+        Task<bool> SetDefaultAddress(Guid addressId);
+        Task<bool> DeleteAddress(Guid addressId);
     }
 }
