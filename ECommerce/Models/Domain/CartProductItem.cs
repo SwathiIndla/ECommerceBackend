@@ -13,7 +13,11 @@ public partial class CartProductItem
 
     public long Quantity { get; set; }
 
+    public Guid SellerId { get; set; }
+
     public virtual Cart Cart { get; set; } = null!;
 
     public virtual ProductItemDetail ProductItem { get; set; } = null!;
+
+    public virtual Seller Seller { get; set; } = null!;
 }

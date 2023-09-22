@@ -34,6 +34,13 @@ namespace ECommerce.Mappings
                 .ReverseMap();
             CreateMap<Address, AddressDto>().ReverseMap();
             CreateMap<AddAddressRequestDto, Address>().ReverseMap();
+            CreateMap<AddProductItemToCartDto, CartProductItem>().ReverseMap();
+            CreateMap<CartProductItem, CartProductItemDto>()
+                .ForMember(x => x.ProductItemImage, opt => opt.MapFrom(src => src.ProductItem.ProductItemImage))
+                .ForMember(x => x.ProductItemName, opt => opt.MapFrom(src => src.ProductItem.ProductItemName))
+                .ForMember(x => x.Price, opt => opt.MapFrom(src => src.ProductItem.Price))
+                .ForMember(x => x.SellerName, opt => opt.MapFrom(src => src.Seller.SellerName))
+                .ReverseMap();
         }
     }
 }

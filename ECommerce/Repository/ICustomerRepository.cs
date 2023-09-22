@@ -11,5 +11,7 @@ namespace ECommerce.Repository
         Task<AddressDto?> UpdateAddress(AddressDto addressDto);
         Task<bool> SetDefaultAddress(Guid addressId);
         Task<bool> DeleteAddress(Guid addressId);
+        Task<Cart> CreateCartAsync(Cart customerCart);
+        Task<CustomerCredential?> GetCustomerById(Guid customerId);
     }
 }

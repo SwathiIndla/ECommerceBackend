@@ -1,5 +1,6 @@
 ﻿using ECommerce.Models.DTOs;
 using ECommerce.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,14 @@ namespace ECommerce.Controllers
         {
             var finalVariantAndFeatures = await productRepositoryService.FilterProductVariant(productId, filterConditions, featuresDataNeeded);
             return finalVariantAndFeatures.Variants.Count > 0 ? Ok(finalVariantAndFeatures) : NotFound();
+        }
+
+        [HttpGet("{customerId}/{productItemId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> IsProductItemInCart([FromRoute] Guid customerId, [FromRoute] Guid productItemId)
+        {
+            var result = await productRepositoryService.IsProductItemInCart(productItemId, customerId);
+            return result ? Ok(new { IsAvailable = result }) : NotFound(new {IsAvailable = false});
         }
     }
 }

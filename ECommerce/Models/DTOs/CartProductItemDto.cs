@@ -7,5 +7,7 @@
         public long Quantity { get; set; }
         public string? ProductItemImage { get; set; }
         public string ProductItemName { get; set; } = null!;
+        public decimal Price { get; set; }
+        public string SellerName { get; set;} = null!;
     }
 }

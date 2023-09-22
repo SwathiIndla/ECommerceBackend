@@ -115,5 +115,17 @@ namespace ECommerce.Services
             }
             return success;
         }
+
+        public async Task<Cart> CreateCartAsync(Cart customerCart)
+        {
+            await dbContext.Carts.AddAsync(customerCart);
+            await dbContext.SaveChangesAsync();
+            return customerCart;
+        }
+
+        public async Task<CustomerCredential?> GetCustomerById(Guid customerId)
+        {
+            return await dbContext.CustomerCredentials.FirstOrDefaultAsync(customer => customer.CustomerId == customerId);
+        }
     }
 }

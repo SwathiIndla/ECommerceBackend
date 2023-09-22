@@ -128,13 +128,15 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
 
             entity.ToTable("Cart");
 
+            entity.HasIndex(e => e.CustomerId, "IX_Cart").IsUnique();
+
             entity.Property(e => e.CartId)
                 .ValueGeneratedNever()
                 .HasColumnName("cart_id");
             entity.Property(e => e.CustomerId).HasColumnName("customer_id");
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.Carts)
-                .HasForeignKey(d => d.CustomerId)
+            entity.HasOne(d => d.Customer).WithOne(p => p.Cart)
+                .HasForeignKey<Cart>(d => d.CustomerId)
                 .HasConstraintName("FK_cart_CustomerCredential");
         });
 
@@ -146,6 +148,7 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
             entity.Property(e => e.CartId).HasColumnName("cart_id");
             entity.Property(e => e.ProductItemId).HasColumnName("product_item_id");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.SellerId).HasColumnName("seller_id");
 
             entity.HasOne(d => d.Cart).WithMany(p => p.CartProductItems)
                 .HasForeignKey(d => d.CartId)
@@ -154,6 +157,11 @@ public partial class EcommerceContext : Microsoft.EntityFrameworkCore.DbContext
             entity.HasOne(d => d.ProductItem).WithMany(p => p.CartProductItems)
                 .HasForeignKey(d => d.ProductItemId)
                 .HasConstraintName("FK_CartProductItems_product_item_details");
+
+            entity.HasOne(d => d.Seller).WithMany(p => p.CartProductItems)
+                .HasForeignKey(d => d.SellerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CartProductItems_Sellers");
         });
 
         modelBuilder.Entity<Category>(entity =>

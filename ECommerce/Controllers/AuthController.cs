@@ -28,13 +28,13 @@ namespace ECommerce.Controllers
         [HttpPost("signup")]
         public async Task<IActionResult> Signup([FromBody] RegisterRequestDto registerRequestDto)
         {
+            var identityUser = new IdentityUser
+            {
+                Email = registerRequestDto.Email,
+                UserName = registerRequestDto.Email
+            };
             try
             {
-                var identityUser = new IdentityUser
-                {
-                    Email = registerRequestDto.Email,
-                    UserName = registerRequestDto.Email
-                };
                 if (registerRequestDto.Roles.Any() && registerRequestDto.Roles != null && registerRequestDto.Roles.Length > 0)
                 {
                     var identityResult = await userManager.CreateAsync(identityUser, registerRequestDto.Password);
@@ -49,7 +49,13 @@ namespace ECommerce.Controllers
                                 EmailId = identityUser.Email,
                                 Password = identityUser.PasswordHash ?? ""
                             };
+                            var customerCart = new Cart
+                            {
+                                CartId = Guid.NewGuid(),
+                                CustomerId = Guid.Parse(identityUser.Id)
+                            };
                             var createdCustomer = await customerRepositoryService.CreateCustomerAsync(customerCredential);
+                            await customerRepositoryService.CreateCartAsync(customerCart);
                             return Ok(new { Message = localizer["UserRegistrationSuccess"].Value, createdCustomer.CustomerId, createdCustomer.EmailId });
                         }
                         await userManager.DeleteAsync(identityUser);
@@ -61,6 +67,7 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
+                await userManager.DeleteAsync(identityUser);
                 return BadRequest(new { Error = ex.Message, Details = ex.ToString() });
             }
         }
@@ -115,5 +122,6 @@ namespace ECommerce.Controllers
             resultMessage = result.Succeeded ? localizer["PasswordChangeSuccess"].Value : localizer["PasswordChangeFailure"].Value;
             return result.Succeeded ? Ok(new { Message = resultMessage }) : BadRequest(new { Message = resultMessage });
         }
+
     }
 }

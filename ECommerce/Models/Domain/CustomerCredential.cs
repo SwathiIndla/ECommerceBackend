@@ -13,7 +13,7 @@ public partial class CustomerCredential
 
     public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
-    public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
+    public virtual Cart? Cart { get; set; }
 
     public virtual ICollection<ProductItemReview> ProductItemReviews { get; set; } = new List<ProductItemReview>();
 
