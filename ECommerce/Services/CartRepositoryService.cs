@@ -75,5 +75,18 @@ namespace ECommerce.Services
             }
             return result;
         }
+
+        public async Task<bool> IsProductItemInCart(Guid productItemId, Guid customerId)
+        {
+            var result = false;
+            var customerCart = await dbContext.Carts.Include(cart => cart.CartProductItems).FirstOrDefaultAsync(cart => cart.CustomerId == customerId);
+            if (customerCart != null)
+            {
+                var cartProductItem = await dbContext.CartProductItems.Include(item => item.Cart)
+                    .FirstOrDefaultAsync(item => item.Cart.CartId == customerCart.CartId && item.ProductItemId == productItemId);
+                result = cartProductItem != null;
+            }
+            return result;
+        }
     }
 }

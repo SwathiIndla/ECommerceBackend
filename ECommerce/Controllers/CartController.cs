@@ -48,5 +48,13 @@ namespace ECommerce.Controllers
             var result = await cartRepositoryService.UpdateCartItem(updateCartProductItemDto);
             return result ? Ok() : BadRequest();
         }
+
+        [HttpGet("{customerId}/{productItemId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> IsProductItemInCart([FromRoute] Guid customerId, [FromRoute] Guid productItemId)
+        {
+            var result = await cartRepositoryService.IsProductItemInCart(productItemId, customerId);
+            return Ok(new { IsAvailable = result });
+        }
     }
 }

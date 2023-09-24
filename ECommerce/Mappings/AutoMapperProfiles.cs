@@ -41,6 +41,10 @@ namespace ECommerce.Mappings
                 .ForMember(x => x.Price, opt => opt.MapFrom(src => src.ProductItem.Price))
                 .ForMember(x => x.SellerName, opt => opt.MapFrom(src => src.Seller.SellerName))
                 .ReverseMap();
+            CreateMap<AddReviewRequestDto, ProductItemReview>().ReverseMap();
+            CreateMap<ProductItemReview, ReviewDto>()
+                .ForMember(x => x.CustomerName, opt => opt.MapFrom(src => src.Customer.EmailId))
+                .ReverseMap();
         }
     }
 }
