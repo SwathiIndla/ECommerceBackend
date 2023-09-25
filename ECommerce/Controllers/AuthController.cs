@@ -101,9 +101,9 @@ namespace ECommerce.Controllers
         }
 
         [HttpPost("find-user")]
-        public async Task<IActionResult> GetUserByEmail([FromBody] string email)
+        public async Task<IActionResult> GetUserByEmail([FromBody] GetUserByEmailDto details)
         {
-            var user = await userManager.FindByEmailAsync(email);
+            var user = await userManager.FindByEmailAsync(details.Email);
             return user != null ? Ok() : NotFound();
         }
 

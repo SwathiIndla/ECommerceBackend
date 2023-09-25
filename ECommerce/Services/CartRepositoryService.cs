@@ -19,9 +19,9 @@ namespace ECommerce.Services
             this.mapper = mapper;
         }
 
-        public async Task<bool> AddToCart(AddProductItemToCartDto addProductItemToCartDto)
+        public async Task<AddToCartResultDto> AddToCart(AddProductItemToCartDto addProductItemToCartDto)
         {
-            var result = false;
+            AddToCartResultDto result = new AddToCartResultDto { Result = false, CartProductItem = null};
             var userCart = await dbContext.Carts.FirstOrDefaultAsync(cart => cart.CustomerId == addProductItemToCartDto.CustomerId);
             var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == addProductItemToCartDto.ProductItemId);
             var seller = await dbContext.Sellers.FirstOrDefaultAsync(seller => seller.SellerId == addProductItemToCartDto.SellerId);
@@ -32,7 +32,8 @@ namespace ECommerce.Services
                 cartProductItemDomain.CartProductItemId = Guid.NewGuid();
                 await dbContext.CartProductItems.AddAsync(cartProductItemDomain);
                 await dbContext.SaveChangesAsync();
-                result = true;
+                result.Result = true;
+                result.CartProductItem = mapper.Map<CartProductItemDto>(cartProductItemDomain);
             }
             return result;
         }

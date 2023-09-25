@@ -56,6 +56,7 @@ builder.Services.AddScoped<ICategoriesRepository, CategoriesRepositoryService>()
 builder.Services.AddScoped<IProductRepository, ProductRepositoryService>();
 builder.Services.AddScoped<ICartRepository, CartRepositoryService>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepositoryService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepositoryService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

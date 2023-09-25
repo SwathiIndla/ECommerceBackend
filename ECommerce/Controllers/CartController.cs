@@ -22,7 +22,7 @@ namespace ECommerce.Controllers
         public async Task<IActionResult> AddToCart([FromBody] AddProductItemToCartDto addProductItemToCartDto)
         {
             var result = await cartRepositoryService.AddToCart(addProductItemToCartDto);
-            return result ? Ok() : BadRequest();
+            return result.Result ? Ok(result) : BadRequest(result);
         }
 
         [HttpGet("{customerId}")]
