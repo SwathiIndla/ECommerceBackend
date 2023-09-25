@@ -45,10 +45,10 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("all/{productId}")]
-        public async Task<IActionResult> GetAllReviews([FromRoute] Guid productId, [FromQuery] bool sortOnRatingAsc = true)
+        public async Task<IActionResult> GetAllReviews([FromRoute] Guid productId, [FromQuery] bool sortOnRatingAsc = false)
         {
             var reviewsList = await reviewRepositoryService.GetAllReviews(productId, sortOnRatingAsc);
-            return reviewsList.Count != 0 ? Ok(reviewsList) : BadRequest();
+            return reviewsList != null ? Ok(reviewsList) : BadRequest();
         }
     }
 }
