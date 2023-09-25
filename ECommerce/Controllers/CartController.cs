@@ -49,7 +49,7 @@ namespace ECommerce.Controllers
             return result ? Ok() : BadRequest();
         }
 
-        [HttpGet("{customerId}/{productItemId}")]
+        [HttpGet("IsProductItemInCart/{customerId}/{productItemId}")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> IsProductItemInCart([FromRoute] Guid customerId, [FromRoute] Guid productItemId)
         {

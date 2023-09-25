@@ -20,10 +20,10 @@ namespace ECommerce.Controllers
         public async Task<IActionResult> AddReview([FromBody] AddReviewRequestDto reviewRequestDto)
         {
             var result = await reviewRepositoryService.AddReview(reviewRequestDto);
-            return result ? Ok() : BadRequest();
+            return result != null ? Ok(result) : BadRequest();
         }
 
-        [HttpGet("{customerId}/{productId}")]
+        [HttpGet("IsReviewPresent/{customerId}/{productId}")]
         public async Task<IActionResult> IsReviewPresent([FromRoute] Guid customerId, [FromRoute] Guid productId)
         {
             var result = await reviewRepositoryService.IsReviewPresent(customerId, productId);
@@ -49,6 +49,13 @@ namespace ECommerce.Controllers
         {
             var reviewsList = await reviewRepositoryService.GetAllReviews(productId, sortOnRatingAsc);
             return reviewsList != null ? Ok(reviewsList) : BadRequest();
+        }
+
+        [HttpGet("IsProductReviewable/{customerId}/{productId}")]
+        public async Task<IActionResult> IsProductReviewable([FromRoute] Guid customerId, [FromRoute] Guid productId)
+        {
+            var result = await reviewRepositoryService.IsProductReviewable(customerId, productId);
+            return result ? Ok() : BadRequest();
         }
     }
 }

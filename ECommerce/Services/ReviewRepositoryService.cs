@@ -18,9 +18,9 @@ namespace ECommerce.Services
             this.mapper = mapper;
         }
 
-        public async Task<bool> AddReview(AddReviewRequestDto addReviewDto)
+        public async Task<ReviewDto?> AddReview(AddReviewRequestDto addReviewDto)
         {
-            var result = false;
+            ReviewDto? reviewDto = null;
             var product = await dbContext.Products.FirstOrDefaultAsync(prod => prod.ProductId == addReviewDto.ProductId);
             var customer  = await dbContext.CustomerCredentials.FirstOrDefaultAsync(cust => cust.CustomerId == addReviewDto.CustomerId);
             if(product != null && customer != null)
@@ -29,9 +29,9 @@ namespace ECommerce.Services
                 reviewDomain.ProductReviewId = Guid.NewGuid();
                 await dbContext.ProductItemReviews.AddAsync(reviewDomain);
                 await dbContext.SaveChangesAsync();
-                result = true;
+                reviewDto = mapper.Map<ReviewDto>(reviewDomain);
             }
-            return result;
+            return reviewDto;
         }
 
         public async Task<ReviewDto?> EditReview(EditReviewRequestDto editReviewRequestDto)
@@ -77,6 +77,13 @@ namespace ECommerce.Services
                 reviewsDto = reviewsDto.OrderBy(review => review.Rating).ToList();
             }
             return reviewsDto;
+        }
+
+        public async Task<bool> IsProductReviewable(Guid customerId, Guid productId)
+        {
+            var orders = await dbContext.ShippingOrders.Include(order => order.OrderedItems).ThenInclude(item => item.ProductItem)
+                .Where(order => order.CustomerId == customerId && order.OrderedItems.Any(item => item.ProductItem.ProductId == productId)).ToListAsync();
+            return orders.Count > 0;
         }
     }
 }

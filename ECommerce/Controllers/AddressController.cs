@@ -41,7 +41,7 @@ namespace ECommerce.Controllers
             return updatedAddress != null ? Ok(updatedAddress) : NotFound();
         }
 
-        [HttpPut("{addressId}")]
+        [HttpPut("SetDefault/{addressId}")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> SetDefaultAddress([FromRoute] Guid addressId)
         {
