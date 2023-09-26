@@ -24,7 +24,7 @@ namespace ECommerce.Services
             var result = new OrderResultDto { Result = false, OrderId = orderId};
             if (order != null)
             {
-                dbContext.ShippingOrders.Remove(order);
+                order.OrderStatus = "Cancelled";
                 await dbContext.SaveChangesAsync();
                 result.Result = true;
             }
@@ -74,7 +74,7 @@ namespace ECommerce.Services
 
         public async Task<OrderDto> GetOrderById(Guid orderId)
         {
-            var order = await dbContext.ShippingOrders.FirstOrDefaultAsync(orders => orders.OrderId == orderId);
+            var order = await dbContext.ShippingOrders.Include(orders => orders.OrderedItems).ThenInclude(item => item.ProductItem).FirstOrDefaultAsync(orders => orders.OrderId == orderId);
             var orderDto = mapper.Map<OrderDto>(order);
             return orderDto;
         }

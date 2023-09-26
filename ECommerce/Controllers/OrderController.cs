@@ -30,7 +30,7 @@ namespace ECommerce.Controllers
             return order != null ? Ok(order) : NotFound();
         }
 
-        [HttpPost("{customerId}")]
+        [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto createOrderDto)
         {
             var createOrderResult = await orderRepositoryService.CreateOrder(createOrderDto);
