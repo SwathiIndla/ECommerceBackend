@@ -7,6 +7,7 @@ namespace ECommerce.Repository
         Task<List<OrderDto>> GetAllOrders(Guid customerId);
         Task<OrderResultDto> CreateOrder(CreateOrderRequestDto createOrderDto);
         Task<OrderResultDto> CancelOrder(Guid orderId);
+        Task<OrderResultDto> ReturnOrder(Guid orderId);
         Task<OrderDto> GetOrderById(Guid orderId);
     }
 }

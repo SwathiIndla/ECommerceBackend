@@ -37,10 +37,17 @@ namespace ECommerce.Controllers
             return createOrderResult.Result ? Ok(createOrderResult) : BadRequest(createOrderResult);
         }
 
-        [HttpPut("{orderId}")]
+        [HttpPut("Cancel/{orderId}")]
         public async Task<IActionResult> CancelOrder([FromRoute] Guid orderId)
         {
             var cancelRequestResult = await orderRepositoryService.CancelOrder(orderId);
+            return cancelRequestResult.Result ? Ok(cancelRequestResult) : BadRequest(cancelRequestResult);
+        }
+
+        [HttpPut("Return/{orderId}")]
+        public async Task<IActionResult> ReturnOrder([FromRoute] Guid orderId)
+        {
+            var cancelRequestResult = await orderRepositoryService.ReturnOrder(orderId);
             return cancelRequestResult.Result ? Ok(cancelRequestResult) : BadRequest(cancelRequestResult);
         }
     }

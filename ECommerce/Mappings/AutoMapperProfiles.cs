@@ -48,6 +48,7 @@ namespace ECommerce.Mappings
             CreateMap<ShippingOrder, OrderDto>().ReverseMap();
             CreateMap<OrderedItem, OrderedItemDto>()
                 .ForMember(x => x.ProductItemImage, opt => opt.MapFrom(src => src.ProductItem.ProductItemImage))
+                .ForMember(x => x.ProductItemName, opt => opt.MapFrom(src => src.ProductItem.ProductItemName))
                 .ReverseMap();
         }
     }

@@ -31,6 +31,19 @@ namespace ECommerce.Services
             return result;
         }
 
+        public async Task<OrderResultDto> ReturnOrder(Guid orderId)
+        {
+            var order = await dbContext.ShippingOrders.FirstOrDefaultAsync(orders => orders.OrderId == orderId);
+            var result = new OrderResultDto { Result = false, OrderId = orderId };
+            if (order != null)
+            {
+                order.OrderStatus = "Returned";
+                await dbContext.SaveChangesAsync();
+                result.Result = true;
+            }
+            return result;
+        }
+
         public async Task<OrderResultDto> CreateOrder(CreateOrderRequestDto createOrderDto)
         {
             var cartProductItems = await dbContext.CartProductItems.Include(item => item.ProductItem).Where(item => createOrderDto.CartProductItemIds.Contains(item.CartProductItemId)).ToListAsync();
