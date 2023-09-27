@@ -87,7 +87,7 @@ namespace ECommerce.Controllers
                         if (roles != null)
                         {
                             var jwtToken = tokenProviderService.CreateJwtToken(user, roles.ToList());
-                            return Ok(new { jwtToken, CustomerId = user.Id });
+                            return Ok(new { jwtToken, CustomerId = user.Id, CustomerEmail = user.Email });
                         }
                     }
                     return BadRequest(new { Message = localizer["InvalidPassword"].Value });
