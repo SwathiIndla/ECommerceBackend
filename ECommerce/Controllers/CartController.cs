@@ -6,60 +6,123 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.Controllers
 {
+    /// <summary>
+    /// This API Controller handles all the logic related to the Cart
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class CartController : ControllerBase
     {
         private readonly ICartRepository cartRepositoryService;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cartRepositoryService"></param>
         public CartController(ICartRepository cartRepositoryService)
         {
             this.cartRepositoryService = cartRepositoryService;
         }
 
+        /// <summary>
+        /// Adds productItem to the customer's cart
+        /// </summary>
+        /// <param name="addProductItemToCartDto">AddProductItemToCartDto Object</param>
+        /// <returns>Returns 200Ok response with AddToCartResultDto object if product item is successfully added to cart otherwise 400BadRequest</returns>
         [HttpPost]
         [Authorize(Roles ="Customer")]
-        //This API will add a productItem to the cart of the customer
         public async Task<IActionResult> AddToCart([FromBody] AddProductItemToCartDto addProductItemToCartDto)
         {
-            var result = await cartRepositoryService.AddToCart(addProductItemToCartDto);
-            return result.Result ? Ok(result) : BadRequest(result);
+            try
+            {
+                var result = await cartRepositoryService.AddToCart(addProductItemToCartDto);
+                return result.Result ? Ok(result) : BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Retrieve all the productItems present in the customer's cart
+        /// </summary>
+        /// <param name="customerId">Guid</param>
+        /// <returns>Returns 200Ok response with List(CartProductItemDto) if present otherwise 404NotFound</returns>
         [HttpGet("{customerId}")]
         [Authorize(Roles = "Customer")]
-        //This API will retrieve all the productItems present in the cart of the customer
         public async Task<IActionResult> GetCartProductItems([FromRoute] Guid customerId)
         {
-            var cartItemsList = await cartRepositoryService.GetAll(customerId);
-            return cartItemsList != null ? Ok(cartItemsList) : NotFound();
+            try
+            {
+                var cartItemsList = await cartRepositoryService.GetAll(customerId);
+                return cartItemsList != null ? Ok(cartItemsList) : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Delete the respective productItem from the customer's cart
+        /// </summary>
+        /// <param name="cartProductItemId">Guid</param>
+        /// <returns>Returns 200Ok response if deletion is successful otherwise 400BadRequest</returns>
         [HttpDelete("{cartProductItemId}")]
         [Authorize(Roles = "Customer")]
-        //This API will delete the respective productItem from the cart of the customer
         public async Task<IActionResult> DeleteFromCart([FromRoute] Guid cartProductItemId)
         {
-            var result = await cartRepositoryService.DeleteCartItem(cartProductItemId);
-            return result ? Ok() : BadRequest();
+            try
+            {
+                var result = await cartRepositoryService.DeleteCartItem(cartProductItemId);
+                return result ? Ok() : BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Updates the quantity of the productItem in customer's cart
+        /// </summary>
+        /// <param name="updateCartProductItemDto">UpdateCartProductItemDto object</param>
+        /// <returns>Returns 200Ok response if updation is successful otherwise 400BadRequest</returns>
         [HttpPut]
         [Authorize(Roles = "Customer")]
-        //This API will update the quantity of the productItem present in the cart
         public async Task<IActionResult> UpdateCartProductItem([FromBody] UpdateCartProductItemDto updateCartProductItemDto)
         {
-            var result = await cartRepositoryService.UpdateCartItem(updateCartProductItemDto);
-            return result ? Ok() : BadRequest();
+            try
+            {
+                var result = await cartRepositoryService.UpdateCartItem(updateCartProductItemDto);
+                return result ? Ok() : BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Checks if the productItem is already present in cart
+        /// </summary>
+        /// <param name="customerId">Guid</param>
+        /// <param name="productItemId">Guid</param>
+        /// <returns>Returns 200Ok response with IsAvailable flag in a object</returns>
         [HttpGet("IsProductItemInCart/{customerId}/{productItemId}")]
         [Authorize(Roles = "Customer")]
-        //This API will give a bool IsAvailable if the productItem is already present in the cart
         public async Task<IActionResult> IsProductItemInCart([FromRoute] Guid customerId, [FromRoute] Guid productItemId)
         {
-            var result = await cartRepositoryService.IsProductItemInCart(productItemId, customerId);
-            return Ok(new { IsAvailable = result });
+            try
+            {
+                var result = await cartRepositoryService.IsProductItemInCart(productItemId, customerId);
+                return Ok(new { IsAvailable = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
     }
 }

@@ -8,6 +8,9 @@ using Microsoft.Extensions.Localization;
 
 namespace ECommerce.Controllers
 {
+    /// <summary>
+    /// This API Controller handles all the Logic related to User Registration and Logins
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -17,6 +20,13 @@ namespace ECommerce.Controllers
         private readonly IStringLocalizer<AuthController> localizer;
         private readonly ICustomerRepository customerRepositoryService;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="tokenProviderService"></param>
+        /// <param name="localizer"></param>
+        /// <param name="customerRepositoryService"></param>
         public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenProviderService, IStringLocalizer<AuthController> localizer, ICustomerRepository customerRepositoryService)
         {
             this.userManager = userManager;
@@ -25,8 +35,12 @@ namespace ECommerce.Controllers
             this.customerRepositoryService = customerRepositoryService;
         }
 
+        /// <summary>
+        /// Creates a new User
+        /// </summary>
+        /// <param name="registerRequestDto">RegisterRequestDto Object</param>
+        /// <returns>Returns 200OK response with a Message,CustomerId,EmailID in an object if creation is successful otherwise 400BadRequest with a Message,Error in a object</returns>
         [HttpPost("signup")]
-        //This API will register a new user
         public async Task<IActionResult> Signup([FromBody] RegisterRequestDto registerRequestDto)
         {
             var identityUser = new IdentityUser
@@ -73,8 +87,12 @@ namespace ECommerce.Controllers
             }
         }
 
+        /// <summary>
+        /// Verify if the user is valid
+        /// </summary>
+        /// <param name="loginRequestDto">LoginRequestDto object</param>
+        /// <returns>Returns a 2000k response with jwtToken, CustomerId and CustomerEmail as an object otherwise a 400BadRequest</returns>
         [HttpPost("login")]
-        //This API will verify if the user is valid and will return a jwtToken
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
             try
@@ -102,29 +120,51 @@ namespace ECommerce.Controllers
             }
         }
 
+        /// <summary>
+        /// Checks if the User with given Email exists
+        /// </summary>
+        /// <param name="details">GetUserByEmailDto object</param>
+        /// <returns>Returns 200Ok response if the User exists otherwise 404NotFound</returns>
         [HttpPost("find-user")]
-        //This API will return 200Ok response if the user with the given mail id is found otherwise return 404NotFound
         public async Task<IActionResult> GetUserByEmail([FromBody] GetUserByEmailDto details)
         {
-            var user = await userManager.FindByEmailAsync(details.Email);
-            return user != null ? Ok() : NotFound();
+            try
+            {
+                var user = await userManager.FindByEmailAsync(details.Email);
+                return user != null ? Ok() : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Resets the password of the user
+        /// </summary>
+        /// <param name="newDetails">LoginRequestDto object</param>
+        /// <returns>Returns 200Ok response if password is reset successfully otherwise 400BadRequest both the responses will have an object with Message key</returns>
         [HttpPut("reset-password")]
-        //This API will reset the password of the user in case if he forgets the password
         public async Task<IActionResult> ResetPassword([FromBody] LoginRequestDto newDetails)
         {
-            var user = await userManager.FindByEmailAsync(newDetails.Email);
-            var resultMessage = "";
-            if (user == null)
+            try
             {
-                resultMessage = localizer["InvalidEmail"].Value;
-                return NotFound(resultMessage);
+                var user = await userManager.FindByEmailAsync(newDetails.Email);
+                var resultMessage = "";
+                if (user == null)
+                {
+                    resultMessage = localizer["InvalidEmail"].Value;
+                    return NotFound(resultMessage);
+                }
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await userManager.ResetPasswordAsync(user, token, newDetails.Password);
+                resultMessage = result.Succeeded ? localizer["PasswordChangeSuccess"].Value : localizer["PasswordChangeFailure"].Value;
+                return result.Succeeded ? Ok(new { Message = resultMessage }) : BadRequest(new { Message = resultMessage });
             }
-            var token = await userManager.GeneratePasswordResetTokenAsync(user);
-            var result = await userManager.ResetPasswordAsync(user, token, newDetails.Password);
-            resultMessage = result.Succeeded ? localizer["PasswordChangeSuccess"].Value : localizer["PasswordChangeFailure"].Value;
-            return result.Succeeded ? Ok(new { Message = resultMessage }) : BadRequest(new { Message = resultMessage });
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
 
     }
