@@ -139,7 +139,7 @@ namespace ECommerce.Services
                 ProductItemDetails = mapper.Map<ProductItemCardDto>(productItem),
                 AvailableVariantOptions = productItem.Product.Category.PropertyNames
                 .Select(property => new PropertiesOfVariants { Name = property.PropertyName1, Values =
-                dbContext.ProductItemConfigurations.Where(config => config.PropertyValue.PropertyName.PropertyName1 == property.PropertyName1)
+                dbContext.ProductItemConfigurations.Include(config => config.ProductItem).Where(config => config.PropertyValue.PropertyName.PropertyName1 == property.PropertyName1 && config.ProductItem.ProductId == productItem.ProductId)
                 .Select(values => values.PropertyValue.PropertyValue1).Distinct().ToList() }). ToDictionary(key => key.Name, value => value.Values)
             } : null;
             return productDescriptionWithVariants;
