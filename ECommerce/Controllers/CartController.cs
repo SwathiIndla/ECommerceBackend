@@ -19,6 +19,7 @@ namespace ECommerce.Controllers
 
         [HttpPost]
         [Authorize(Roles ="Customer")]
+        //This API will add a productItem to the cart of the customer
         public async Task<IActionResult> AddToCart([FromBody] AddProductItemToCartDto addProductItemToCartDto)
         {
             var result = await cartRepositoryService.AddToCart(addProductItemToCartDto);
@@ -27,6 +28,7 @@ namespace ECommerce.Controllers
 
         [HttpGet("{customerId}")]
         [Authorize(Roles = "Customer")]
+        //This API will retrieve all the productItems present in the cart of the customer
         public async Task<IActionResult> GetCartProductItems([FromRoute] Guid customerId)
         {
             var cartItemsList = await cartRepositoryService.GetAll(customerId);
@@ -35,6 +37,7 @@ namespace ECommerce.Controllers
 
         [HttpDelete("{cartProductItemId}")]
         [Authorize(Roles = "Customer")]
+        //This API will delete the respective productItem from the cart of the customer
         public async Task<IActionResult> DeleteFromCart([FromRoute] Guid cartProductItemId)
         {
             var result = await cartRepositoryService.DeleteCartItem(cartProductItemId);
@@ -43,6 +46,7 @@ namespace ECommerce.Controllers
 
         [HttpPut]
         [Authorize(Roles = "Customer")]
+        //This API will update the quantity of the productItem present in the cart
         public async Task<IActionResult> UpdateCartProductItem([FromBody] UpdateCartProductItemDto updateCartProductItemDto)
         {
             var result = await cartRepositoryService.UpdateCartItem(updateCartProductItemDto);
@@ -51,6 +55,7 @@ namespace ECommerce.Controllers
 
         [HttpGet("IsProductItemInCart/{customerId}/{productItemId}")]
         [Authorize(Roles = "Customer")]
+        //This API will give a bool IsAvailable if the productItem is already present in the cart
         public async Task<IActionResult> IsProductItemInCart([FromRoute] Guid customerId, [FromRoute] Guid productItemId)
         {
             var result = await cartRepositoryService.IsProductItemInCart(productItemId, customerId);

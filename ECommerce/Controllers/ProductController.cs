@@ -18,6 +18,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("{productItemId}")]
+        //This API will return the complete details of the productItem
         public async Task<IActionResult> GetDetailedProductItem([FromRoute] Guid productItemId)
         {
             var detailedProductItem = await productRepositoryService.GetDetailedProductItem(productItemId);
@@ -25,6 +26,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("variant/{productId}")]
+        //This API will return the available variants of the product
         public async Task<IActionResult> GetProductVariantDetails([FromRoute] Guid productId, [FromQuery] FilterVariantParametersDto filterConditions, [FromQuery] List<string> featuresDataNeeded)
         {
             var finalVariantAndFeatures = await productRepositoryService.FilterProductVariant(productId, filterConditions, featuresDataNeeded);

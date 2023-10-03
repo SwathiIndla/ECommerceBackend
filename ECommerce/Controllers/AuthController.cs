@@ -26,6 +26,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPost("signup")]
+        //This API will register a new user
         public async Task<IActionResult> Signup([FromBody] RegisterRequestDto registerRequestDto)
         {
             var identityUser = new IdentityUser
@@ -73,6 +74,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPost("login")]
+        //This API will verify if the user is valid and will return a jwtToken
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
             try
@@ -101,6 +103,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPost("find-user")]
+        //This API will return 200Ok response if the user with the given mail id is found otherwise return 404NotFound
         public async Task<IActionResult> GetUserByEmail([FromBody] GetUserByEmailDto details)
         {
             var user = await userManager.FindByEmailAsync(details.Email);
@@ -108,6 +111,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPut("reset-password")]
+        //This API will reset the password of the user in case if he forgets the password
         public async Task<IActionResult> ResetPassword([FromBody] LoginRequestDto newDetails)
         {
             var user = await userManager.FindByEmailAsync(newDetails.Email);

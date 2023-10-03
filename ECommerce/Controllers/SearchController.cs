@@ -20,6 +20,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet]
+        //This API will search the productItems database for the search string provided
         public async Task<IActionResult> SearchProducts([FromQuery] SortProductsDto sortConditions, [FromQuery] string? search = null, [FromQuery] int page = 1)
         {
             var searchResults = !string.IsNullOrEmpty(search) ? await productRepositoryService.SearchProductItem(search, page, sortConditions) : new PaginatedSearchResultsDto();

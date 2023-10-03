@@ -21,6 +21,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("hierarchy")]
+        //This API will return the hierarchy of all the categories present in the database
         public async Task<IActionResult> GetCategoriesHierarchy()
         {
             var hierarchy = await categoriesRepositoryService.GetCategoryHierarchyAsync();
@@ -29,6 +30,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("properties/{categoryId}")]
+        //This API will return all the properties specific to the given categoryId
         public async Task<IActionResult> GetPropertiesOfCategory([FromRoute] Guid categoryId)
         {
             var propertiesDomain = await categoriesRepositoryService.GetPropertiesOfCategoryAsync(categoryId);
@@ -37,6 +39,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("brands/{categoryId}")]
+        //This API will return all the brands available in the specific category with the categoryId
         public async Task<IActionResult> GetBrandsOfCategory([FromRoute] Guid categoryId)
         {
             var brands = await categoriesRepositoryService.GetBrandsAsync(categoryId);

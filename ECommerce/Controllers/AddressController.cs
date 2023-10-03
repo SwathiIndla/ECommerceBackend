@@ -19,6 +19,7 @@ namespace ECommerce.Controllers
 
         [HttpGet("{customerId}")]
         [Authorize(Roles = "Customer")]
+        //This will retrieve all the addresses of the Customer with customerId
         public async Task<IActionResult> GetAddresses([FromRoute] Guid customerId)
         {
             var addresses = await customerRepositoryService.GetAddressesOfCustomer(customerId);
@@ -27,6 +28,7 @@ namespace ECommerce.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Customer")]
+        //This will add a new address to the Customer needs an AddAddressRequestDto object to be sent in the body
         public async Task<IActionResult> AddAddress([FromBody] AddAddressRequestDto addressDto)
         {
             var newAddress = await customerRepositoryService.AddAddressToCustomer(addressDto);
@@ -35,6 +37,7 @@ namespace ECommerce.Controllers
 
         [HttpPut]
         [Authorize(Roles = "Customer")]
+        //This will update the address of a customer and needs an AddressDto object to be sent in body
         public async Task<IActionResult> UpdateAddress([FromBody] AddressDto updatedAddressDto)
         {
             var updatedAddress = await customerRepositoryService.UpdateAddress(updatedAddressDto);
@@ -43,6 +46,7 @@ namespace ECommerce.Controllers
 
         [HttpPut("SetDefault/{addressId}")]
         [Authorize(Roles = "Customer")]
+        //This API will set the Address with addressId as default address of the customer
         public async Task<IActionResult> SetDefaultAddress([FromRoute] Guid addressId)
         {
             var success = await customerRepositoryService.SetDefaultAddress(addressId);
@@ -51,6 +55,7 @@ namespace ECommerce.Controllers
 
         [HttpDelete("{addressId}")]
         [Authorize(Roles = "Customer")]
+        //This API will delete the Address with addressId from the Customer's address list
         public async Task<IActionResult> DeleteAddress([FromRoute] Guid addressId)
         {
             var success = await customerRepositoryService.DeleteAddress(addressId);

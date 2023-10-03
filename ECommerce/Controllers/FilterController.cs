@@ -18,6 +18,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("{categoryId}")]
+        //This API will filter the products based on the filter parameters provided
         public async Task<IActionResult> GetProductCards([FromRoute] Guid categoryId ,[FromQuery] FilterProductsQueryParametersDto filterConditions, [FromQuery] SortProductsDto sortConditions)
         {
             var productItems = await productRepositoryService.FilterProducts(categoryId, filterConditions, sortConditions);

@@ -17,6 +17,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("{customerId}")]
+        //This API will retrieve all the orders details of the customer with id customerId
         public async Task<IActionResult> GetOrders([FromRoute] Guid customerId)
         {
             var orderList = await orderRepositoryService.GetAllOrders(customerId);
@@ -24,6 +25,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("GetOrder/{orderId}")]
+        //This API will return the specific order details of the order with id as orderId
         public async Task<IActionResult> GetOrderById([FromRoute] Guid orderId)
         {
             var order = await orderRepositoryService.GetOrderById(orderId);
@@ -31,6 +33,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPost]
+        //This API will create a new order 
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto createOrderDto)
         {
             var createOrderResult = await orderRepositoryService.CreateOrder(createOrderDto);
@@ -38,6 +41,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPut("Cancel/{orderId}")]
+        //This API will change the status of the order to cancelled
         public async Task<IActionResult> CancelOrder([FromRoute] Guid orderId)
         {
             var cancelRequestResult = await orderRepositoryService.CancelOrder(orderId);
@@ -45,6 +49,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPut("Return/{orderId}")]
+        //This API will change the status of the order to returned
         public async Task<IActionResult> ReturnOrder([FromRoute] Guid orderId)
         {
             var cancelRequestResult = await orderRepositoryService.ReturnOrder(orderId);

@@ -17,6 +17,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPost]
+        //This API will add a review to the product
         public async Task<IActionResult> AddReview([FromBody] AddReviewRequestDto reviewRequestDto)
         {
             var result = await reviewRepositoryService.AddReview(reviewRequestDto);
@@ -24,6 +25,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("IsReviewPresent/{customerId}/{productId}")]
+        //This API will return a bool and the review if the customer has already given a review for the product
         public async Task<IActionResult> IsReviewPresent([FromRoute] Guid customerId, [FromRoute] Guid productId)
         {
             var result = await reviewRepositoryService.IsReviewPresent(customerId, productId);
@@ -31,6 +33,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPut]
+        //This API will edit the review which is already given by the customer for a product
         public async Task<IActionResult> EditReview([FromBody] EditReviewRequestDto editReviewRequestDto)
         {
             var reviewDto = await reviewRepositoryService.EditReview(editReviewRequestDto);
@@ -38,6 +41,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpDelete("{productReviewId}")]
+        //This API will delete the review of a product
         public async Task<IActionResult> DeleteReview([FromRoute] Guid productReviewId)
         {
             var result = await reviewRepositoryService.DeleteReview(productReviewId);
@@ -45,6 +49,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("all/{productId}")]
+        //This API will retreive all the reviews available for the product
         public async Task<IActionResult> GetAllReviews([FromRoute] Guid productId, [FromQuery] bool sortOnRatingAsc = false)
         {
             var reviewsList = await reviewRepositoryService.GetAllReviews(productId, sortOnRatingAsc);
@@ -52,6 +57,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpGet("IsProductReviewable/{customerId}/{productId}")]
+        //This API will return 200OK response if the customer is allowed to review the product otherwise returns 400BadRequest
         public async Task<IActionResult> IsProductReviewable([FromRoute] Guid customerId, [FromRoute] Guid productId)
         {
             var result = await reviewRepositoryService.IsProductReviewable(customerId, productId);
