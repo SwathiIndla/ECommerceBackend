@@ -20,11 +20,19 @@ namespace ECommerce.Services
 
         public async Task<OrderResultDto> CancelOrder(Guid orderId)
         {
-            var order = await dbContext.ShippingOrders.FirstOrDefaultAsync(orders => orders.OrderId == orderId);
+            var order = await dbContext.ShippingOrders.Include(order => order.OrderedItems).FirstOrDefaultAsync(orders => orders.OrderId == orderId);
             var result = new OrderResultDto { Result = false, OrderId = orderId};
             if (order != null)
             {
                 order.OrderStatus = "Cancelled";
+                foreach( var orderItem in order.OrderedItems )
+                {
+                    var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == orderItem.ProductItemId);
+                    if(productItem != null)
+                    {
+                        productItem.QtyInStock = productItem.QtyInStock + orderItem.Quantity;
+                    }
+                }
                 await dbContext.SaveChangesAsync();
                 result.Result = true;
             }
@@ -33,11 +41,19 @@ namespace ECommerce.Services
 
         public async Task<OrderResultDto> ReturnOrder(Guid orderId)
         {
-            var order = await dbContext.ShippingOrders.FirstOrDefaultAsync(orders => orders.OrderId == orderId);
+            var order = await dbContext.ShippingOrders.Include(order => order.OrderedItems).FirstOrDefaultAsync(orders => orders.OrderId == orderId);
             var result = new OrderResultDto { Result = false, OrderId = orderId };
             if (order != null)
             {
                 order.OrderStatus = "Returned";
+                foreach (var orderItem in order.OrderedItems)
+                {
+                    var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == orderItem.ProductItemId);
+                    if (productItem != null)
+                    {
+                        productItem.QtyInStock = productItem.QtyInStock + orderItem.Quantity;
+                    }
+                }
                 await dbContext.SaveChangesAsync();
                 result.Result = true;
             }
@@ -69,6 +85,11 @@ namespace ECommerce.Services
                         Quantity = cartProductItem.Quantity,
                         Price = cartProductItem.ProductItem.Price
                     };
+                    var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == cartProductItem.ProductItemId);
+                    if (productItem != null)
+                    {
+                        productItem.QtyInStock = productItem.QtyInStock - cartProductItem.Quantity;
+                    }
                     await dbContext.OrderedItems.AddAsync(orderItem);
                 }
                 await dbContext.SaveChangesAsync();
