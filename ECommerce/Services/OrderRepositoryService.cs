@@ -30,7 +30,7 @@ namespace ECommerce.Services
                     var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == orderItem.ProductItemId);
                     if(productItem != null)
                     {
-                        productItem.QtyInStock = productItem.QtyInStock + orderItem.Quantity;
+                        productItem.QtyInStock += orderItem.Quantity;
                     }
                 }
                 await dbContext.SaveChangesAsync();
@@ -51,7 +51,7 @@ namespace ECommerce.Services
                     var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == orderItem.ProductItemId);
                     if (productItem != null)
                     {
-                        productItem.QtyInStock = productItem.QtyInStock + orderItem.Quantity;
+                        productItem.QtyInStock += orderItem.Quantity;
                     }
                 }
                 await dbContext.SaveChangesAsync();
@@ -88,7 +88,7 @@ namespace ECommerce.Services
                     var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == cartProductItem.ProductItemId);
                     if (productItem != null)
                     {
-                        productItem.QtyInStock = productItem.QtyInStock - cartProductItem.Quantity;
+                        productItem.QtyInStock -= cartProductItem.Quantity;
                     }
                     await dbContext.OrderedItems.AddAsync(orderItem);
                 }
