@@ -8,7 +8,7 @@ namespace ECommerce.Repository
         Task<ReviewDto?> AddReview(AddReviewRequestDto addReviewDto);
         Task<ReviewDto?> EditReview(EditReviewRequestDto editReviewRequestDto);
         Task<bool> DeleteReview(Guid productReviewId);
-        Task<List<ReviewDto>> GetAllReviews(Guid productId, bool sortOnRatingAsc);
+        Task<ReviewSummaryDto?> GetAllReviews(Guid productId, bool sortOnRatingAsc, int page);
         Task<bool> IsProductReviewable(Guid customerId, Guid productId);
     }
 }

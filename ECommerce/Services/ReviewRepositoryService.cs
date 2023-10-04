@@ -11,6 +11,7 @@ namespace ECommerce.Services
     {
         private readonly EcommerceContext dbContext;
         private readonly IMapper mapper;
+        private readonly int pageSize = 10;
 
         public ReviewRepositoryService(EcommerceContext dbContext, IMapper mapper)
         {
@@ -68,15 +69,26 @@ namespace ECommerce.Services
             return result;
         }
 
-        public async Task<List<ReviewDto>> GetAllReviews(Guid productId, bool sortOnRatingAsc)
+        public async Task<ReviewSummaryDto?> GetAllReviews(Guid productId, bool sortOnRatingAsc, int page)
         {
-            var reviews = await dbContext.ProductItemReviews.Include(review => review.Customer).Where(review => review.ProductId == productId).OrderByDescending(review => review.Rating).ToListAsync();
+            var reviews = await dbContext.ProductItemReviews.Include(review => review.Customer).Where(review => review.ProductId == productId && review.Review != null).OrderByDescending(review => review.Rating).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
             var reviewsDto = mapper.Map<List<ReviewDto>>(reviews);
-            if(reviewsDto.Count > 0 && sortOnRatingAsc)
+            var productDetail = await dbContext.Products.Include(product => product.ProductItemReviews).FirstOrDefaultAsync(product => product.ProductId == productId);
+            ReviewSummaryDto? reviewsSummary = null;
+            if (productDetail != null)
             {
-                reviewsDto = reviewsDto.OrderBy(review => review.Rating).ToList();
+                reviewsSummary = new ReviewSummaryDto();
+                reviewsSummary.TotalRatings = productDetail.ProductItemReviews.Count > 0 ? productDetail.ProductItemReviews.Count : 0;
+                reviewsSummary.TotalReviews = productDetail.ProductItemReviews.Count > 0 ? productDetail.ProductItemReviews.Count(product => product.Review != null) : 0;
+                reviewsSummary.AverageRating = productDetail.ProductItemReviews.Count > 0 ? productDetail.ProductItemReviews.Average(product => product.Rating) : 0;
+                reviewsSummary.FiveStarRatings = productDetail.ProductItemReviews.Count > 0 ? productDetail.ProductItemReviews.Count(product => product.Rating == 5) : 0;
+                reviewsSummary.FourStarRatings = productDetail.ProductItemReviews.Count > 0 ? productDetail.ProductItemReviews.Count(product => product.Rating == 4) : 0;
+                reviewsSummary.ThreeStarRatings = productDetail.ProductItemReviews.Count > 0 ? productDetail.ProductItemReviews.Count(product => product.Rating == 3) : 0;
+                reviewsSummary.TwoStarRatings = productDetail.ProductItemReviews.Count > 0 ? productDetail.ProductItemReviews.Count(product => product.Rating == 2) : 0;
+                reviewsSummary.OneStarRatings = productDetail.ProductItemReviews.Count > 0 ? productDetail.ProductItemReviews.Count(product => product.Rating == 1) : 0;
+                reviewsSummary.Reviews = reviewsDto.Count > 0 && sortOnRatingAsc ? reviewsDto.OrderBy(review => review.Rating).ToList() : reviewsDto;
             }
-            return reviewsDto;
+            return reviewsSummary;
         }
 
         public async Task<bool> IsProductReviewable(Guid customerId, Guid productId)

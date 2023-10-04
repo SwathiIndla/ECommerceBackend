@@ -99,20 +99,21 @@ namespace ECommerce.Controllers
                 return BadRequest(new { ex.Message });
             }
         }
-
+        
         /// <summary>
         /// Retrieves all the reviews available for the product
         /// </summary>
         /// <param name="productId">Guid</param>
         /// <param name="sortOnRatingAsc">bool</param>
-        /// <returns>Returns 200Ok response with List(ReviewDto) if the reviews are present otherwise 400BadRequest</returns>
+        /// <param name="page">int</param>
+        /// <returns>Returns 200Ok response with ReviewSummaryDto if the reviews are present otherwise 400BadRequest</returns>
         [HttpGet("all/{productId}")]
-        public async Task<IActionResult> GetAllReviews([FromRoute] Guid productId, [FromQuery] bool sortOnRatingAsc = false)
+        public async Task<IActionResult> GetAllReviews([FromRoute] Guid productId, [FromQuery] bool sortOnRatingAsc = false, [FromQuery] int page = 1)
         {
             try
             {
-                var reviewsList = await reviewRepositoryService.GetAllReviews(productId, sortOnRatingAsc);
-                return reviewsList != null ? Ok(reviewsList) : BadRequest();
+                var reviewsSummary = await reviewRepositoryService.GetAllReviews(productId, sortOnRatingAsc, page);
+                return reviewsSummary != null ? Ok(reviewsSummary) : BadRequest();
             }
             catch (Exception ex)
             {
