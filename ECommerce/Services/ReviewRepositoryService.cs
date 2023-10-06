@@ -94,7 +94,7 @@ namespace ECommerce.Services
         public async Task<bool> IsProductReviewable(Guid customerId, Guid productId)
         {
             var orders = await dbContext.ShippingOrders.Include(order => order.OrderedItems).ThenInclude(item => item.ProductItem)
-                .Where(order => order.CustomerId == customerId && order.OrderedItems.Any(item => item.ProductItem.ProductId == productId)).ToListAsync();
+                .Where(order => order.CustomerId == customerId && (order.OrderStatus == "Delivered" || order.OrderStatus == "Returned") && order.OrderedItems.Any(item => item.ProductItem.ProductId == productId)).ToListAsync();
             return orders.Count > 0;
         }
     }

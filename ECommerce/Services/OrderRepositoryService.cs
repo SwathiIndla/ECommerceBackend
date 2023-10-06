@@ -101,7 +101,7 @@ namespace ECommerce.Services
 
         public async Task<List<OrderDto>> GetAllOrders(Guid customerId)
         {
-            var orders = await dbContext.ShippingOrders.Include(order => order.OrderedItems).ThenInclude(item => item.ProductItem).Where(order => order.CustomerId == customerId).ToListAsync();
+            var orders = await dbContext.ShippingOrders.Include(order => order.OrderedItems).ThenInclude(item => item.ProductItem).Where(order => order.CustomerId == customerId).OrderByDescending(order => order.OrderDate).ToListAsync();
             var ordersDto = mapper.Map<List<OrderDto>>(orders);
             return ordersDto;
         }
