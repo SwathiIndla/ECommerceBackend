@@ -154,7 +154,7 @@ namespace ECommerce.Controllers
                 if (user == null)
                 {
                     resultMessage = localizer["InvalidEmail"].Value;
-                    return NotFound(resultMessage);
+                    return NotFound(new { Message = resultMessage });
                 }
                 var token = await userManager.GeneratePasswordResetTokenAsync(user);
                 var result = await userManager.ResetPasswordAsync(user, token, newDetails.Password);

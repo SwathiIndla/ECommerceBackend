@@ -128,7 +128,9 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
             var identityUser = fixture.Create<IdentityUser>();
             var roles = fixture.Create<List<string>>();
             var jwtToken = fixture.Create<string>();
-            var objectResult = new { jwtToken };
+            var CustomerId = identityUser.Id;
+            var CustomerEmail = identityUser.Email;
+            var objectResult = new { jwtToken, CustomerId, CustomerEmail };
             userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
             userManagerMock.Setup(x => x.CheckPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).ReturnsAsync(true);
             userManagerMock.Setup(x => x.GetRolesAsync(It.IsAny<IdentityUser>())).ReturnsAsync(roles);
@@ -188,6 +190,108 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
             Assert.IsType<BadRequestObjectResult>(result);
             result.Should().NotBeNull();
             userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetUserByEmail_ShouldReturnOkResponse_WhenUserWithGivenEmailFound()
+        {
+            var getUserByEmail = fixture.Create<GetUserByEmailDto>();
+            var identityUser = fixture.Create<IdentityUser>();
+            userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
+
+            var result = await sut.GetUserByEmail(getUserByEmail).ConfigureAwait(false);
+
+            Assert.IsType<OkResult>(result);
+            result.Should().NotBeNull();
+            userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetUserByEmail_ShouldReturnNotFound_WhenInvalidEmailIsProvided ()
+        {
+            var getUserByEmail = fixture.Create<GetUserByEmailDto>();
+            IdentityUser? identityUser = null;
+
+            userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
+
+            var result = await sut.GetUserByEmail(getUserByEmail).ConfigureAwait(false);
+
+            Assert.IsType<NotFoundResult>(result);
+            result.Should().NotBeNull();
+            userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetUserByEmail_ShouldReturnBadRequest_WhenExceptionOccurs()
+        {
+            var getUserByEmail = fixture.Create<GetUserByEmailDto>();
+
+            userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).Throws<Exception>();
+
+            var result = await sut.GetUserByEmail(getUserByEmail).ConfigureAwait(false);
+
+            Assert.IsType<BadRequestObjectResult>(result);
+            result.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task ResetPassword_ShouldReturnOkResponse_WhenValidDataIsProvided()
+        {
+            var loginRequestDto = fixture.Create<LoginRequestDto>();
+            var identityUser = fixture.Create<IdentityUser>();
+            var token = fixture.Create<string>();
+            var resultObject = new { Message = "Password changed successfully. Please Login" };
+
+            userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
+            userManagerMock.Setup(x => x.GeneratePasswordResetTokenAsync(It.IsAny<IdentityUser>())).ReturnsAsync(token);
+            userManagerMock.Setup(x => x.ResetPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+            localizerMock.Setup(loc => loc["PasswordChangeSuccess"]).Returns(new LocalizedString("PasswordChangeSuccess", "Password changed successfully. Please Login"));
+
+            var result = await sut.ResetPassword(loginRequestDto).ConfigureAwait(false);
+
+            Assert.IsType<OkObjectResult>(result);
+            result.Should().NotBeNull();
+            var okResult = (OkObjectResult)result;
+            Assert.Equal(resultObject.ToString(), (okResult.Value ?? "").ToString());
+        }
+
+        [Fact]
+        public async Task ResetPassword_ShouldReturnBadRequest_WhenResetOperationFailed()
+        {
+            var loginRequestDto = fixture.Create<LoginRequestDto>();
+            var identityUser = fixture.Create<IdentityUser>();
+            var token = fixture.Create<string>();
+            var resultObject = new { Message = "Failed to reset password" };
+
+            userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
+            userManagerMock.Setup(x => x.GeneratePasswordResetTokenAsync(It.IsAny<IdentityUser>())).ReturnsAsync(token);
+            userManagerMock.Setup(x => x.ResetPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Failed(new IdentityError { }));
+            localizerMock.Setup(loc => loc["PasswordChangeFailure"]).Returns(new LocalizedString("PasswordChangeFailure", "Failed to reset password"));
+
+            var result = await sut.ResetPassword(loginRequestDto).ConfigureAwait(false);
+
+            Assert.IsType<BadRequestObjectResult>(result);
+            result.Should().NotBeNull();
+            var badRequestResult = (BadRequestObjectResult)result;
+            Assert.Equal(resultObject.ToString(), (badRequestResult.Value ?? "").ToString());
+        }
+
+        [Fact]
+        public async Task ResetPassword_ShouldReturnNotFound_WhenInvalidDataProvided()
+        {
+            var loginRequestDto = fixture.Create<LoginRequestDto>();
+            IdentityUser? identityUser = null;
+            var resultObject = new { Message = "Invalid Email Entered..!!" };
+
+            userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
+            localizerMock.Setup(loc => loc["InvalidEmail"]).Returns(new LocalizedString("InvalidEmail", "Invalid Email Entered..!!"));
+
+            var result = await sut.ResetPassword(loginRequestDto).ConfigureAwait(false);
+
+            Assert.IsType<NotFoundObjectResult>(result);
+            result.Should().NotBeNull();
+            var notFoundResult = (NotFoundObjectResult)result;
+            Assert.Equal(resultObject.ToString(), (notFoundResult.Value ?? "").ToString());
         }
     }
 }

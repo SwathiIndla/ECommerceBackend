@@ -24,10 +24,10 @@ namespace ECommerce.Services
             Address? addressDomain = null;
             if (user != null)
             {
-                var ListOfAddresses = await dbContext.Addresses.Where(address => address.CustomerId == addressDto.CustomerId).ToListAsync();
+                var ListOfAddresses = dbContext.Addresses.Where(address => address.CustomerId == addressDto.CustomerId);
                 addressDomain = mapper.Map<Address>(addressDto);
                 addressDomain.AddressId = Guid.NewGuid();
-                if (ListOfAddresses.Count == 0)
+                if (ListOfAddresses.Count() == 0)
                 {
                     addressDomain.IsDefault = true;
                 }
