@@ -2,38 +2,46 @@
 using ECommerce.DbContext;
 using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Repository.Interface;
+using ECommerce.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ECommerce.Services
+namespace ECommerce.Services.Implementation
 {
-    public class OrderRepositoryService : IOrderRepository
+    public class OrderService : IOrderService
     {
-        private readonly EcommerceContext dbContext;
         private readonly IMapper mapper;
+        private readonly IOrderRepository orderRepository;
+        private readonly IProductRepository productRepository;
+        private readonly ISaveChangesRepository saveChangesRepository;
+        private readonly ICartRepository cartRepository;
 
-        public OrderRepositoryService(EcommerceContext dbContext, IMapper mapper)
+        public OrderService(IMapper mapper, IOrderRepository orderRepository, IProductRepository productRepository, ISaveChangesRepository saveChangesRepository,
+             ICartRepository cartRepository)
         {
-            this.dbContext = dbContext;
             this.mapper = mapper;
+            this.orderRepository = orderRepository;
+            this.productRepository = productRepository;
+            this.saveChangesRepository = saveChangesRepository;
+            this.cartRepository = cartRepository;
         }
 
         public async Task<OrderResultDto> CancelOrder(Guid orderId)
         {
-            var order = await dbContext.ShippingOrders.Include(order => order.OrderedItems).FirstOrDefaultAsync(orders => orders.OrderId == orderId);
-            var result = new OrderResultDto { Result = false, OrderId = orderId};
+            var order = await orderRepository.GetShippedOrder(orderId);
+            var result = new OrderResultDto { Result = false, OrderId = orderId };
             if (order != null)
             {
                 order.OrderStatus = "Cancelled";
-                foreach( var orderItem in order.OrderedItems )
+                foreach (var orderItem in order.OrderedItems)
                 {
-                    var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == orderItem.ProductItemId);
-                    if(productItem != null)
+                    var productItem = await productRepository.GetProductItemById(orderItem.ProductItemId);
+                    if (productItem != null)
                     {
                         productItem.QtyInStock += orderItem.Quantity;
                     }
                 }
-                await dbContext.SaveChangesAsync();
+                await saveChangesRepository.AsynchronousSaveChanges();
                 result.Result = true;
             }
             return result;
@@ -41,20 +49,20 @@ namespace ECommerce.Services
 
         public async Task<OrderResultDto> ReturnOrder(Guid orderId)
         {
-            var order = await dbContext.ShippingOrders.Include(order => order.OrderedItems).FirstOrDefaultAsync(orders => orders.OrderId == orderId);
+            var order = await orderRepository.GetShippedOrder(orderId);
             var result = new OrderResultDto { Result = false, OrderId = orderId };
             if (order != null)
             {
                 order.OrderStatus = "Returned";
                 foreach (var orderItem in order.OrderedItems)
                 {
-                    var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == orderItem.ProductItemId);
+                    var productItem = await productRepository.GetProductItemById(orderItem.ProductItemId);
                     if (productItem != null)
                     {
                         productItem.QtyInStock += orderItem.Quantity;
                     }
                 }
-                await dbContext.SaveChangesAsync();
+                await saveChangesRepository.AsynchronousSaveChanges();
                 result.Result = true;
             }
             return result;
@@ -62,9 +70,9 @@ namespace ECommerce.Services
 
         public async Task<OrderResultDto> CreateOrder(CreateOrderRequestDto createOrderDto)
         {
-            var cartProductItems = await dbContext.CartProductItems.Include(item => item.ProductItem).Where(item => createOrderDto.CartProductItemIds.Contains(item.CartProductItemId)).ToListAsync();
-            OrderResultDto result = new OrderResultDto { Result = false, OrderId = null };
-            if(cartProductItems != null && cartProductItems.Count > 0)
+            var cartProductItems = await cartRepository.GetCartProductItemsList(createOrderDto);
+            var result = new OrderResultDto { Result = false, OrderId = null };
+            if (cartProductItems != null && cartProductItems.Count > 0)
             {
                 var order = new ShippingOrder
                 {
@@ -74,7 +82,7 @@ namespace ECommerce.Services
                     OrderDate = DateTime.Now,
                     OrderStatus = "Ordered"
                 };
-                await dbContext.ShippingOrders.AddAsync(order);
+                await orderRepository.AddOrder(order);
                 foreach (var cartProductItem in cartProductItems)
                 {
                     var orderItem = new OrderedItem
@@ -85,14 +93,15 @@ namespace ECommerce.Services
                         Quantity = cartProductItem.Quantity,
                         Price = cartProductItem.ProductItem.Price
                     };
-                    var productItem = await dbContext.ProductItemDetails.FirstOrDefaultAsync(item => item.ProductItemId == cartProductItem.ProductItemId);
+                    var productItem = await productRepository.GetProductItemById(cartProductItem.ProductItemId);
                     if (productItem != null)
                     {
                         productItem.QtyInStock -= cartProductItem.Quantity;
                     }
-                    await dbContext.OrderedItems.AddAsync(orderItem);
+                    await orderRepository.AddOrderedItem(orderItem);
+                    cartRepository.RemoveProductItemFromCart(cartProductItem);
                 }
-                await dbContext.SaveChangesAsync();
+                await saveChangesRepository.AsynchronousSaveChanges();
                 result.Result = true;
                 result.OrderId = order.OrderId;
             }
@@ -101,14 +110,14 @@ namespace ECommerce.Services
 
         public async Task<List<OrderDto>> GetAllOrders(Guid customerId)
         {
-            var orders = await dbContext.ShippingOrders.Include(order => order.OrderedItems).ThenInclude(item => item.ProductItem).Where(order => order.CustomerId == customerId).OrderByDescending(order => order.OrderDate).ToListAsync();
+            var orders = await orderRepository.GetAllOrdersOfCustomerDesc(customerId);
             var ordersDto = mapper.Map<List<OrderDto>>(orders);
             return ordersDto;
         }
 
         public async Task<OrderDto> GetOrderById(Guid orderId)
         {
-            var order = await dbContext.ShippingOrders.Include(orders => orders.OrderedItems).ThenInclude(item => item.ProductItem).FirstOrDefaultAsync(orders => orders.OrderId == orderId);
+            var order = await orderRepository.GetShippedOrder(orderId);
             var orderDto = mapper.Map<OrderDto>(order);
             return orderDto;
         }

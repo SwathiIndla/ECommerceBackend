@@ -1,5 +1,5 @@
 ﻿using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,13 +12,13 @@ namespace ECommerce.Controllers
     [ApiController]
     public class ReviewController : ControllerBase
     {
-        private readonly IReviewRepository reviewRepositoryService;
+        private readonly IReviewService reviewRepositoryService;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="reviewRepositoryService"></param>
-        public ReviewController(IReviewRepository reviewRepositoryService)
+        public ReviewController(IReviewService reviewRepositoryService)
         {
             this.reviewRepositoryService = reviewRepositoryService;
         }
@@ -126,14 +126,14 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="customerId">Guid</param>
         /// <param name="productId">Guid</param>
-        /// <returns>Returns 200OK response if the product is reviewable otherwise 400BadRequest</returns>
+        /// <returns>Returns 200OK response if the product is reviewable otherwise 404NotFound. Returns 400BadRequest if Exception occurs</returns>
         [HttpGet("IsProductReviewable/{customerId}/{productId}")]
         public async Task<IActionResult> IsProductReviewable([FromRoute] Guid customerId, [FromRoute] Guid productId)
         {
             try
             {
                 var result = await reviewRepositoryService.IsProductReviewable(customerId, productId);
-                return result ? Ok() : BadRequest();
+                return result ? Ok() : NotFound();
             }
             catch (Exception ex)
             {

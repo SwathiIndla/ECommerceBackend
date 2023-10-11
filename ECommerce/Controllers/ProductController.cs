@@ -1,5 +1,5 @@
 ﻿using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +13,13 @@ namespace ECommerce.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly IProductRepository productRepositoryService;
+        private readonly IProductService productRepositoryService;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="productRepositoryService"></param>
-        public ProductController(IProductRepository productRepositoryService)
+        public ProductController(IProductService productRepositoryService)
         {
             this.productRepositoryService = productRepositoryService;
         }

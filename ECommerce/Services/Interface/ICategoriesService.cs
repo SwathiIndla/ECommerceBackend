@@ -1,8 +1,8 @@
 ﻿using ECommerce.Models.Domain;
 
-namespace ECommerce.Repository
+namespace ECommerce.Services.Interface
 {
-    public interface ICategoriesRepository
+    public interface ICategoriesService
     {
         Task<List<Category>> GetCategoryHierarchyAsync();
         Task<List<PropertyName>> GetPropertiesOfCategoryAsync(Guid categoryId);

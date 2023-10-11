@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using ECommerce.Models.DTOs;
-using ECommerce.Repository;
 using ECommerce.Services;
+using ECommerce.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,7 +14,7 @@ namespace ECommerce.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ICategoriesRepository categoriesRepositoryService;
+        private readonly ICategoriesService categoriesRepositoryService;
         private readonly IMapper mapper;
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="categoriesRepositoryService"></param>
         /// <param name="mapper"></param>
-        public CategoriesController(ICategoriesRepository categoriesRepositoryService, IMapper mapper)
+        public CategoriesController(ICategoriesService categoriesRepositoryService, IMapper mapper)
         {
             this.categoriesRepositoryService = categoriesRepositoryService;
             this.mapper = mapper;

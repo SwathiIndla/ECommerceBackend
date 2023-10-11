@@ -2,25 +2,28 @@
 using ECommerce.DbContext;
 using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Repository.Interface;
+using ECommerce.Services.Interface;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Identity.Client.Extensions.Msal;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
-namespace ECommerce.Services
+namespace ECommerce.Services.Implementation
 {
-    public class ProductRepositoryService : IProductRepository
+    public class ProductService : IProductService
     {
         private readonly EcommerceContext dbContext;
         private readonly IMapper mapper;
+        private readonly IProductRepository productRepository;
         private readonly int pageSize = 20;
 
-        public ProductRepositoryService(EcommerceContext dbContext, IMapper mapper)
+        public ProductService(EcommerceContext dbContext, IMapper mapper, IProductRepository productRepository)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
+            this.productRepository = productRepository;
         }
 
         public async Task<PaginatedSearchResultsDto> SearchProductItem(string search, int page, SortProductsDto sortConditions)
@@ -29,23 +32,18 @@ namespace ECommerce.Services
             var searchTerms = string.IsNullOrEmpty(search) ? Array.Empty<string>() : search.Split(' ');
             foreach (var term in searchTerms)
             {
-                var results = await dbContext.ProductItemDetails.Include(item => item.Product)
-                    .Include(item => item.Product.ProductItemReviews)
-                    .Include(item => item.SellerProductItems).ThenInclude(sellerProduct => sellerProduct.Seller)
-                    .Include(item => item.ProductItemConfigurations).ThenInclude(config => config.PropertyValue).ThenInclude(propValue => propValue.PropertyName)
-                    .Include(item => item.Product.Category).ThenInclude(category => category.PropertyNames)
-                    .Where(item => item.ProductItemName.Replace(" ", string.Empty).ToLower().Contains(term.ToLower())).ToListAsync();
+                var results = await productRepository.GetSearchResults(term);
                 matchingProducts.AddRange(results);
             }
-            var uniqueMatchingProducts = matchingProducts.Distinct().ToList();
+            var uniqueMatchingProducts = productRepository.GetDistinctProductItems(matchingProducts);
             var ListOfProductItemCardDto = mapper.Map<List<ProductItemCardDto>>(uniqueMatchingProducts);
             if (sortConditions.SortOnPrice)
             {
-                ListOfProductItemCardDto = sortConditions.SortByPriceAsc ? ListOfProductItemCardDto.OrderBy(item => item.Price).ToList() : ListOfProductItemCardDto.OrderByDescending(item => item.Price).ToList();
+                ListOfProductItemCardDto = sortConditions.SortByPriceAsc ? productRepository.GetProductItemsByPriceAsc(ListOfProductItemCardDto) : productRepository.GetProductItemsByPriceDesc(ListOfProductItemCardDto);
             }
             if (sortConditions.SortOnRating)
             {
-                ListOfProductItemCardDto = sortConditions.SortByRatingAsc ? ListOfProductItemCardDto.OrderBy(item => item.Rating).ToList() : ListOfProductItemCardDto.OrderByDescending(item => item.Rating).ToList();
+                ListOfProductItemCardDto = sortConditions.SortByRatingAsc ? productRepository.GetProductItemsByRatingAsc(ListOfProductItemCardDto) : productRepository.GetProductItemsByRatingDesc(ListOfProductItemCardDto);
             }
             var finalSearchResult = new PaginatedSearchResultsDto
             {
@@ -71,19 +69,19 @@ namespace ECommerce.Services
                 filterConditions.RAM.Contains(config.PropertyValue.PropertyValue1))) : query;
             //Filtering product items on the storage
             query = filterConditions.Storage != null && filterConditions.Storage.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
-                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Storage) && 
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Storage) &&
                 filterConditions.Storage.Contains(config.PropertyValue.PropertyValue1))) : query;
             //Filtering product items on the battery
             query = filterConditions.Battery != null && filterConditions.Battery.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
-                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Battery) && 
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Battery) &&
                 filterConditions.Battery.Contains(config.PropertyValue.PropertyValue1))) : query;
             //Filtering product items on the screen size
             query = filterConditions.Screen_Size != null && filterConditions.Screen_Size.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
-                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Screen_Size) && 
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Screen_Size) &&
                 filterConditions.Screen_Size.Contains(config.PropertyValue.PropertyValue1))) : query;
             //Filtering product items on the resolution
             query = filterConditions.Resolution != null && filterConditions.Resolution.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
-                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Resolution) && 
+                config => config.PropertyValue.PropertyName.PropertyName1 == nameof(filterConditions.Resolution) &&
                 filterConditions.Resolution.Contains(config.PropertyValue.PropertyValue1))) : query;
             //Filtering mobile product items on the primary camera
             query = filterConditions.Primary_Camera != null && filterConditions.Primary_Camera.Any() ? query.Where(item => item.ProductItemConfigurations.Any(
@@ -111,12 +109,12 @@ namespace ECommerce.Services
             }
             if (sortConditions.SortOnRating)
             {
-                query = sortConditions.SortByRatingAsc ? query.OrderBy(item => item.Product.ProductItemReviews.Average(rating => rating.Rating)) 
+                query = sortConditions.SortByRatingAsc ? query.OrderBy(item => item.Product.ProductItemReviews.Average(rating => rating.Rating))
                     : query.OrderByDescending(item => item.Product.ProductItemReviews.Average(rating => rating.Rating));
             }
             var productItems = await query.ToListAsync();
             var totalResultCount = productItems.Count;
-            var filteredResults = productItems.Skip((filterConditions.Page - 1)*pageSize).Take(pageSize).ToList();
+            var filteredResults = productItems.Skip((filterConditions.Page - 1) * pageSize).Take(pageSize).ToList();
             var ListOfProductItemCardDto = mapper.Map<List<ProductItemCardDto>>(filteredResults);
             var finalFilteredResults = new PaginatedFilterResults
             {
@@ -138,9 +136,13 @@ namespace ECommerce.Services
             {
                 ProductItemDetails = mapper.Map<ProductItemCardDto>(productItem),
                 AvailableVariantOptions = productItem.Product.Category.PropertyNames
-                .Select(property => new PropertiesOfVariants { Name = property.PropertyName1, Values =
+                .Select(property => new PropertiesOfVariants
+                {
+                    Name = property.PropertyName1,
+                    Values =
                 dbContext.ProductItemConfigurations.Include(config => config.ProductItem).Where(config => config.PropertyValue.PropertyName.PropertyName1 == property.PropertyName1 && config.ProductItem.ProductId == productItem.ProductId)
-                .Select(values => values.PropertyValue.PropertyValue1).Distinct().ToList() }). ToDictionary(key => key.Name, value => value.Values)
+                .Select(values => values.PropertyValue.PropertyValue1).Distinct().ToList()
+                }).ToDictionary(key => key.Name, value => value.Values)
             } : null;
             return productDescriptionWithVariants;
         }
@@ -171,7 +173,7 @@ namespace ECommerce.Services
             var AvailableFeatureAndOptions = new List<PropertiesOfVariants>();
             if (featuresDataNeeded.Any())
             {
-                foreach(var feature in featuresDataNeeded)
+                foreach (var feature in featuresDataNeeded)
                 {
                     var availableFeatureOption = new PropertiesOfVariants
                     {
@@ -184,7 +186,7 @@ namespace ECommerce.Services
             var finalVariantsAndFeatures = new ProductVariantDetailedPageDto
             {
                 Variants = productVariantsDto,
-                AvailableOptions = AvailableFeatureAndOptions.ToDictionary(key => key.Name,value => value.Values)
+                AvailableOptions = AvailableFeatureAndOptions.ToDictionary(key => key.Name, value => value.Values)
             };
             return finalVariantsAndFeatures;
         }

@@ -1,4 +1,5 @@
-﻿using ECommerce.Repository;
+﻿using ECommerce.Services.Interface;
+using ECommerce.Tokens.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -6,13 +7,13 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ECommerce.Services
+namespace ECommerce.Tokens
 {
-    public class TokenRepositoryService : ITokenRepository
+    public class TokenCreator : ITokenCreator
     {
         private readonly IConfiguration configuration;
 
-        public TokenRepositoryService(IConfiguration configuration)
+        public TokenCreator(IConfiguration configuration)
         {
             this.configuration = configuration;
         }

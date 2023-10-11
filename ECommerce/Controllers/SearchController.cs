@@ -1,7 +1,7 @@
 ﻿using ECommerce.DbContext;
 using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -15,13 +15,13 @@ namespace ECommerce.Controllers
     [ApiController]
     public class SearchController : ControllerBase
     {
-        private readonly IProductRepository productRepositoryService;
+        private readonly IProductService productRepositoryService;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="productRepositoryService"></param>
-        public SearchController(IProductRepository productRepositoryService)
+        public SearchController(IProductService productRepositoryService)
         {
             this.productRepositoryService = productRepositoryService;
         }

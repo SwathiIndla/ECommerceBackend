@@ -1,9 +1,9 @@
 ﻿using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
 
-namespace ECommerce.Repository
+namespace ECommerce.Services.Interface
 {
-    public interface IProductRepository
+    public interface IProductService
     {
         Task<PaginatedSearchResultsDto> SearchProductItem(string search, int page, SortProductsDto sortConditions);
         Task<PaginatedFilterResults> FilterProducts(Guid categoryId, FilterProductsQueryParametersDto filterConditions, SortProductsDto sortConditions);

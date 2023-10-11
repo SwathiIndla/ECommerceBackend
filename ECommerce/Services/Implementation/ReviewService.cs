@@ -2,18 +2,18 @@
 using ECommerce.DbContext;
 using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ECommerce.Services
+namespace ECommerce.Services.Implementation
 {
-    public class ReviewRepositoryService : IReviewRepository
+    public class ReviewService : IReviewService
     {
         private readonly EcommerceContext dbContext;
         private readonly IMapper mapper;
         private readonly int pageSize = 10;
 
-        public ReviewRepositoryService(EcommerceContext dbContext, IMapper mapper)
+        public ReviewService(EcommerceContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
@@ -23,8 +23,8 @@ namespace ECommerce.Services
         {
             ReviewDto? reviewDto = null;
             var product = await dbContext.Products.FirstOrDefaultAsync(prod => prod.ProductId == addReviewDto.ProductId);
-            var customer  = await dbContext.CustomerCredentials.FirstOrDefaultAsync(cust => cust.CustomerId == addReviewDto.CustomerId);
-            if(product != null && customer != null)
+            var customer = await dbContext.CustomerCredentials.FirstOrDefaultAsync(cust => cust.CustomerId == addReviewDto.CustomerId);
+            if (product != null && customer != null)
             {
                 var reviewDomain = mapper.Map<ProductItemReview>(addReviewDto);
                 reviewDomain.ProductReviewId = Guid.NewGuid();
@@ -39,7 +39,7 @@ namespace ECommerce.Services
         {
             ReviewDto? reviewDto = null;
             var review = await dbContext.ProductItemReviews.Include(review => review.Customer).FirstOrDefaultAsync(reviews => reviews.ProductReviewId == editReviewRequestDto.ProductReviewId);
-            if(review != null)
+            if (review != null)
             {
                 review.Review = editReviewRequestDto.Review;
                 review.Rating = editReviewRequestDto.Rating;
@@ -60,7 +60,7 @@ namespace ECommerce.Services
         {
             var review = await dbContext.ProductItemReviews.FirstOrDefaultAsync(reviews => reviews.ProductReviewId == productReviewId);
             var result = false;
-            if(review != null)
+            if (review != null)
             {
                 dbContext.ProductItemReviews.Remove(review);
                 await dbContext.SaveChangesAsync();
@@ -71,7 +71,7 @@ namespace ECommerce.Services
 
         public async Task<ReviewSummaryDto?> GetAllReviews(Guid productId, bool sortOnRatingAsc, int page)
         {
-            var reviews = await dbContext.ProductItemReviews.Include(review => review.Customer).Where(review => review.ProductId == productId && review.Review != null).OrderByDescending(review => review.Rating).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var reviews = await dbContext.ProductItemReviews.Include(review => review.Customer).Where(review => review.ProductId == productId && review.Review != null && review.Review != string.Empty).OrderByDescending(review => review.Rating).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
             var reviewsDto = mapper.Map<List<ReviewDto>>(reviews);
             var productDetail = await dbContext.Products.Include(product => product.ProductItemReviews).FirstOrDefaultAsync(product => product.ProductId == productId);
             ReviewSummaryDto? reviewsSummary = null;

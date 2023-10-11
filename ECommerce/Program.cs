@@ -1,8 +1,12 @@
 using ECommerce.CustomSerializer;
 using ECommerce.DbContext;
 using ECommerce.Mappings;
-using ECommerce.Repository;
-using ECommerce.Services;
+using ECommerce.Repository.Implementation;
+using ECommerce.Repository.Interface;
+using ECommerce.Services.Implementation;
+using ECommerce.Services.Interface;
+using ECommerce.Tokens;
+using ECommerce.Tokens.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -54,14 +58,22 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("ECommerceAuthDbC
 builder.Services.AddDbContext<EcommerceContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("ECommerceDbConnection")));
 
-builder.Services.AddScoped<ITokenRepository,TokenRepositoryService>();
-builder.Services.AddScoped<ICustomerRepository,CustomerRepositoryService>();
-builder.Services.AddScoped<IAdminRepository, AdminRepositoryService>();
-builder.Services.AddScoped<ICategoriesRepository, CategoriesRepositoryService>();
-builder.Services.AddScoped<IProductRepository, ProductRepositoryService>();
-builder.Services.AddScoped<ICartRepository, CartRepositoryService>();
-builder.Services.AddScoped<IReviewRepository, ReviewRepositoryService>();
-builder.Services.AddScoped<IOrderRepository, OrderRepositoryService>();
+builder.Services.AddScoped<ITokenCreator, TokenCreator>();
+builder.Services.AddScoped<ICustomerService,CustomerService>();
+builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<ISaveChangesRepository, SaveChangesRepository>();
+builder.Services.AddScoped<IAddressRepository, AddressRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ISellerRepository, SellerRepository>();
+builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

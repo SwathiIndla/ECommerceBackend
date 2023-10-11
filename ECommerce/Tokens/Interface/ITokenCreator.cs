@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace ECommerce.Repository
+namespace ECommerce.Tokens.Interface
 {
-    public interface ITokenRepository
+    public interface ITokenCreator
     {
         string CreateJwtToken(IdentityUser identityUser, List<string> roles);
     }

@@ -3,7 +3,8 @@ using AutoMapper;
 using ECommerce.DbContext;
 using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
-using ECommerce.Services;
+using ECommerce.Repository.Interface;
+using ECommerce.Services.Implementation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Moq;
@@ -21,40 +22,36 @@ namespace ECommerce.UnitTests.Services
     public class CustomerRepositoryServiceTests
     {
         private readonly IFixture fixture;
-        private readonly Mock<EcommerceContext> contextMock;
         private readonly Mock<IMapper> mapperMock;
-        private readonly CustomerRepositoryService sut;
+        private readonly Mock<IAddressRepository> addressRepositoryMock;
+        private readonly Mock<ICustomerRepository> customerRepositoryMock;
+        private readonly Mock<ISaveChangesRepository> saveChangesRepositoryMock;
+        private readonly CustomerService sut;
 
         public CustomerRepositoryServiceTests()
         {
             fixture = new Fixture();
             fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList().ForEach(b => fixture.Behaviors.Remove(b));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior(1));
-            contextMock = new Mock<EcommerceContext>();
+            addressRepositoryMock = new Mock<IAddressRepository>();
+            customerRepositoryMock = new Mock<ICustomerRepository>();
+            saveChangesRepositoryMock = new Mock<ISaveChangesRepository>();
             mapperMock = new Mock<IMapper>();
-            sut = new CustomerRepositoryService(contextMock.Object, mapperMock.Object);
+            sut = new CustomerService(mapperMock.Object, addressRepositoryMock.Object, customerRepositoryMock.Object
+                , saveChangesRepositoryMock.Object);
         }
 
-        //[Fact]
+        [Fact]
         public async Task AddAddressToCustomer_ShouldReturnAddressDto_WhenAddressAddedSuccessfully()
         {
-            var customerDataMock = new Mock<DbSet<CustomerCredential>>();
             var user = fixture.Create<CustomerCredential>();
-            var addressDataMock = new Mock<DbSet<Address>>();
             var addressRequestDto = fixture.Create<AddAddressRequestDto>();
             var addressDomain = fixture.Create<Address>();
             var addressDto = fixture.Create<AddressDto>();
             var addressList = fixture.Create<List<Address>>();
-            var addressListQueryable = new List<Address>().AsQueryable();
 
-            contextMock.Setup(context => context.Set<CustomerCredential>()).Returns(customerDataMock.Object);
-            contextMock.Setup(context => context.Set<Address>()).Returns(addressDataMock.Object);
-            contextMock.Setup(context => context.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.FromResult(1));
-
-            //customerDataMock.Setup(customer => customer.FirstOrDefaultAsync(It.IsAny<Expression<Func<CustomerCredential, bool>>>(), It.IsAny<CancellationToken>())).ReturnsAsync(user);
-            //addressDataMock.Setup(address => address.Where(It.IsAny<Expression<Func<Address, bool>>>())).Returns(addressListQueryable);
-            addressDataMock.Setup(address => address.AddAsync(It.IsAny<Address>(), It.IsAny<CancellationToken>())).Callback((Address model, CancellationToken token) => { addressList.Add(model); })
-                .Returns((Address model, CancellationToken token) => ValueTask.FromResult((EntityEntry<Address>?) null));
+            customerRepositoryMock.Setup(x => x.GetCustomerById(It.IsAny<Guid>())).ReturnsAsync(user);
+            addressRepositoryMock.Setup(x => x.GetAddressesByCustomerId(It.IsAny<Guid>())).ReturnsAsync(addressList);
 
             mapperMock.Setup(mapper => mapper.Map<Address>(addressRequestDto)).Returns(addressDomain);
             mapperMock.Setup(mapper => mapper.Map<AddressDto>(addressDomain)).Returns(addressDto);
@@ -62,6 +59,20 @@ namespace ECommerce.UnitTests.Services
             var result = await sut.AddAddressToCustomer(addressRequestDto);
 
             Assert.NotNull(result);
+            Assert.IsType<AddressDto>(result);
+            Assert.Equal(addressDto.ToString(), result.ToString());
+        }
+
+        [Fact]
+        public async Task CreateCustomerAsync_ShouldReturnOkResponse_WhenValidDetailsProvided()
+        {
+            var customerCredentials = fixture.Create<CustomerCredential>();
+
+            var result = await sut.CreateCustomerAsync(customerCredentials).ConfigureAwait(false);
+
+            Assert.NotNull(result);
+            Assert.IsType<CustomerCredential>(result);
+            Assert.Equal(customerCredentials.ToString(), result.ToString());
         }
     }
 }

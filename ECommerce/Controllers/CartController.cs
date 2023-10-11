@@ -1,5 +1,5 @@
 ﻿using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +13,13 @@ namespace ECommerce.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
-        private readonly ICartRepository cartRepositoryService;
+        private readonly ICartService cartRepositoryService;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="cartRepositoryService"></param>
-        public CartController(ICartRepository cartRepositoryService)
+        public CartController(ICartService cartRepositoryService)
         {
             this.cartRepositoryService = cartRepositoryService;
         }

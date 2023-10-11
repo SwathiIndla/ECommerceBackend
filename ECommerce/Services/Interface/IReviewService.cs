@@ -1,8 +1,8 @@
 ﻿using ECommerce.Models.DTOs;
 
-namespace ECommerce.Repository
+namespace ECommerce.Services.Interface
 {
-    public interface IReviewRepository
+    public interface IReviewService
     {
         Task<ReviewDto> IsReviewPresent(Guid customerId, Guid productId);
         Task<ReviewDto?> AddReview(AddReviewRequestDto addReviewDto);

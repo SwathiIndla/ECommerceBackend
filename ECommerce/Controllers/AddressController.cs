@@ -1,5 +1,5 @@
 ﻿using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +13,13 @@ namespace ECommerce.Controllers
     [ApiController]
     public class AddressController : ControllerBase
     {
-        private readonly ICustomerRepository customerRepositoryService;
+        private readonly ICustomerService customerRepositoryService;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="customerRepositoryService"></param>
-        public AddressController(ICustomerRepository customerRepositoryService)
+        public AddressController(ICustomerService customerRepositoryService)
         {
             this.customerRepositoryService = customerRepositoryService;
         }

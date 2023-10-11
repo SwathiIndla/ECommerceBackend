@@ -3,7 +3,8 @@ using Castle.Core.Logging;
 using ECommerce.Controllers;
 using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
+using ECommerce.Tokens.Interface;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -19,8 +20,8 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
     {
         private readonly IFixture fixture;
         private readonly Mock<UserManager<IdentityUser>> userManagerMock;
-        private readonly Mock<ITokenRepository> tokenRepositoryServiceMock;
-        private readonly Mock<ICustomerRepository> customerRepositoryServiceMock;
+        private readonly Mock<ITokenCreator> tokenCreatorMock;
+        private readonly Mock<ICustomerService> customerRepositoryServiceMock;
         private readonly Mock<IStringLocalizer<AuthController>> localizerMock;
         private readonly AuthController sut;
 
@@ -33,10 +34,10 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             userManagerMock = new Mock<UserManager<IdentityUser>>(userStore.Object, null, null, null, null, null, null, null, null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-            tokenRepositoryServiceMock = fixture.Freeze<Mock<ITokenRepository>>();
-            customerRepositoryServiceMock = fixture.Freeze<Mock<ICustomerRepository>>();
+            tokenCreatorMock = new Mock<ITokenCreator>();
+            customerRepositoryServiceMock = fixture.Freeze<Mock<ICustomerService>>();
             localizerMock = new Mock<IStringLocalizer<AuthController>>();
-            sut = new AuthController(userManagerMock.Object, tokenRepositoryServiceMock.Object, localizerMock.Object, customerRepositoryServiceMock.Object);
+            sut = new AuthController(userManagerMock.Object, tokenCreatorMock.Object, localizerMock.Object, customerRepositoryServiceMock.Object);
         }
 
         //Signup Action method unit test cases
@@ -48,7 +49,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
 
             userManagerMock.Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
             userManagerMock.Setup(x => x.AddToRolesAsync(It.IsAny<IdentityUser>(), It.IsAny<string[]>())).ReturnsAsync(IdentityResult.Success);
-            customerRepositoryServiceMock.Setup(x => x.CreateCustomerAsync(customerCredential)).ReturnsAsync(customerCredential);
+            customerRepositoryServiceMock.Setup(x => x.CreateCustomerAsync(It.IsAny<CustomerCredential>())).ReturnsAsync(customerCredential);
             localizerMock.Setup(loc => loc["UserRegistrationSuccess"]).Returns(new LocalizedString("UserRegistrationSuccess", "User registered successfully. Please Login"));
 
             var result = await sut.Signup(registerRequestDto).ConfigureAwait(false);
@@ -134,7 +135,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
             userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
             userManagerMock.Setup(x => x.CheckPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).ReturnsAsync(true);
             userManagerMock.Setup(x => x.GetRolesAsync(It.IsAny<IdentityUser>())).ReturnsAsync(roles);
-            tokenRepositoryServiceMock.Setup(x => x.CreateJwtToken(It.IsAny<IdentityUser>(), It.IsAny<List<string>>())).Returns(jwtToken);
+            tokenCreatorMock.Setup(x => x.CreateJwtToken(It.IsAny<IdentityUser>(), It.IsAny<List<string>>())).Returns(jwtToken);
 
             var result = await sut.Login(loginRequestDto).ConfigureAwait(false);
 

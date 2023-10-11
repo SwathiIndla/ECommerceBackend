@@ -1,5 +1,5 @@
 ﻿using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,13 +12,13 @@ namespace ECommerce.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IOrderRepository orderRepositoryService;
+        private readonly IOrderService orderRepositoryService;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="orderRepositoryService"></param>
-        public OrderController(IOrderRepository orderRepositoryService)
+        public OrderController(IOrderService orderRepositoryService)
         {
             this.orderRepositoryService = orderRepositoryService;
         }

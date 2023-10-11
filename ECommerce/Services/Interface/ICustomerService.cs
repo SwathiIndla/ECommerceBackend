@@ -1,9 +1,9 @@
 ﻿using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
 
-namespace ECommerce.Repository
+namespace ECommerce.Services.Interface
 {
-    public interface ICustomerRepository
+    public interface ICustomerService
     {
         Task<CustomerCredential> CreateCustomerAsync(CustomerCredential customerCredential);
         Task<AddressDto> AddAddressToCustomer(AddAddressRequestDto addressDto);

@@ -1,8 +1,8 @@
 ﻿using ECommerce.Models.DTOs;
 
-namespace ECommerce.Repository
+namespace ECommerce.Services.Interface
 {
-    public interface IOrderRepository
+    public interface IOrderService
     {
         Task<List<OrderDto>> GetAllOrders(Guid customerId);
         Task<OrderResultDto> CreateOrder(CreateOrderRequestDto createOrderDto);

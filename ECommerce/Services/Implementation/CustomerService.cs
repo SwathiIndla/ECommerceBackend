@@ -2,32 +2,38 @@
 using ECommerce.DbContext;
 using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Repository.Interface;
+using ECommerce.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ECommerce.Services
+namespace ECommerce.Services.Implementation
 {
-    public class CustomerRepositoryService : ICustomerRepository
+    public class CustomerService : ICustomerService
     {
-        private readonly EcommerceContext dbContext;
         private readonly IMapper mapper;
+        private readonly IAddressRepository addressRepository;
+        private readonly ICustomerRepository customerRepository;
+        private readonly ISaveChangesRepository saveChangesRepository;
 
-        public CustomerRepositoryService(EcommerceContext dbContext, IMapper mapper)
+        public CustomerService(IMapper mapper, IAddressRepository addressRepository, ICustomerRepository customerRepository,
+            ISaveChangesRepository saveChangesRepository)
         {
-            this.dbContext = dbContext;
             this.mapper = mapper;
+            this.addressRepository = addressRepository;
+            this.customerRepository = customerRepository;
+            this.saveChangesRepository = saveChangesRepository;
         }
 
         public async Task<AddressDto> AddAddressToCustomer(AddAddressRequestDto addressDto)
         {
-            var user = await dbContext.CustomerCredentials.FirstOrDefaultAsync(customer => customer.CustomerId == addressDto.CustomerId);
+            var user = await customerRepository.GetCustomerById(addressDto.CustomerId);
             Address? addressDomain = null;
             if (user != null)
             {
-                var ListOfAddresses = dbContext.Addresses.Where(address => address.CustomerId == addressDto.CustomerId);
+                var ListOfAddresses = await addressRepository.GetAddressesByCustomerId(addressDto.CustomerId);
                 addressDomain = mapper.Map<Address>(addressDto);
                 addressDomain.AddressId = Guid.NewGuid();
-                if (ListOfAddresses.Count() == 0)
+                if (ListOfAddresses.Count == 0)
                 {
                     addressDomain.IsDefault = true;
                 }
@@ -41,8 +47,8 @@ namespace ECommerce.Services
                         }
                     }
                 }
-                await dbContext.Addresses.AddAsync(addressDomain);
-                await dbContext.SaveChangesAsync();
+                await addressRepository.AddAddress(addressDomain);
+                await saveChangesRepository.AsynchronousSaveChanges();
             }
             var newAddress = mapper.Map<AddressDto>(addressDomain);
             return newAddress;
@@ -50,21 +56,21 @@ namespace ECommerce.Services
 
         public async Task<CustomerCredential> CreateCustomerAsync(CustomerCredential customerCredential)
         {
-            await dbContext.CustomerCredentials.AddAsync(customerCredential);
-            await dbContext.SaveChangesAsync();
+            await customerRepository.AddCustomer(customerCredential);
+            await saveChangesRepository.AsynchronousSaveChanges();
             return customerCredential;
         }
 
         public async Task<List<AddressDto>> GetAddressesOfCustomer(Guid customerId)
         {
-            var addresses = await dbContext.Addresses.Where(address => address.CustomerId == customerId).ToListAsync();
+            var addresses = await addressRepository.GetAddressesByCustomerId(customerId);
             var addressesDto = mapper.Map<List<AddressDto>>(addresses);
             return addressesDto;
         }
 
         public async Task<AddressDto?> UpdateAddress(AddressDto addressDto)
         {
-            var address = await dbContext.Addresses.Where(address => address.AddressId == addressDto.AddressId).FirstOrDefaultAsync();
+            var address = await addressRepository.GetAddressByAddressId(addressDto.AddressId);
             if (address != null)
             {
                 address.CustomerName = addressDto.CustomerName;
@@ -76,41 +82,41 @@ namespace ECommerce.Services
                 address.PostalCode = addressDto.PostalCode;
                 address.AddressType = addressDto.AddressType;
             }
-            await dbContext.SaveChangesAsync();
+            await saveChangesRepository.AsynchronousSaveChanges();
             var updatedAddress = mapper.Map<AddressDto>(address);
             return updatedAddress;
         }
 
         public async Task<bool> SetDefaultAddress(Guid addressId)
         {
-            var address = await dbContext.Addresses.FirstOrDefaultAsync(add => add.AddressId == addressId);
+            var address = await addressRepository.GetAddressByAddressId(addressId);
             var success = false;
             if (address != null)
             {
                 address.IsDefault = true; success = true;
-                var addresses = dbContext.Addresses.Where(add => add.CustomerId == address.CustomerId && add.AddressId != addressId).AsEnumerable();
+                var addresses = await addressRepository.GetAddressesByCustomerId(address.CustomerId);
                 foreach (var add in addresses)
                 {
-                    add.IsDefault = false;
+                    if (add.AddressId != addressId) add.IsDefault = false;
                 }
             }
-            await dbContext.SaveChangesAsync();
+            await saveChangesRepository.AsynchronousSaveChanges();
             return success;
         }
 
         public async Task<bool> DeleteAddress(Guid addressId)
         {
-            var address = await dbContext.Addresses.FirstOrDefaultAsync(address => address.AddressId == addressId);
+            var address = await addressRepository.GetAddressByAddressId(addressId);
             var success = false;
             if (address != null)
             {
                 if (address.IsDefault)
                 {
-                    var newDefaultAddress = await dbContext.Addresses.FirstOrDefaultAsync(add => add.CustomerId == address.CustomerId && add.AddressId != address.AddressId);
+                    var newDefaultAddress = await addressRepository.GetNonDefaultAddressOfCustomer(address.CustomerId, address.AddressId);
                     if (newDefaultAddress != null) newDefaultAddress.IsDefault = true;
                 }
-                dbContext.Addresses.Remove(address);
-                await dbContext.SaveChangesAsync();
+                addressRepository.RemoveAddress(address);
+                await saveChangesRepository.AsynchronousSaveChanges();
                 success = true;
             }
             return success;
@@ -118,14 +124,14 @@ namespace ECommerce.Services
 
         public async Task<Cart> CreateCartAsync(Cart customerCart)
         {
-            await dbContext.Carts.AddAsync(customerCart);
-            await dbContext.SaveChangesAsync();
+            await customerRepository.CreateCustomerCart(customerCart);
+            await saveChangesRepository.AsynchronousSaveChanges();
             return customerCart;
         }
 
         public async Task<CustomerCredential?> GetCustomerById(Guid customerId)
         {
-            return await dbContext.CustomerCredentials.FirstOrDefaultAsync(customer => customer.CustomerId == customerId);
+            return await customerRepository.GetCustomerById(customerId);
         }
     }
 }

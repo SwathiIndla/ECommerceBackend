@@ -1,8 +1,8 @@
 ﻿using ECommerce.Models.DTOs;
 
-namespace ECommerce.Repository
+namespace ECommerce.Services.Interface
 {
-    public interface ICartRepository
+    public interface ICartService
     {
         Task<AddToCartResultDto> AddToCart(AddProductItemToCartDto addProductItemToCartDto);
         Task<List<CartProductItemDto>?> GetAll(Guid customerId);

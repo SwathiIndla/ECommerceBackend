@@ -1,6 +1,8 @@
 ﻿using ECommerce.Models.Domain;
 using ECommerce.Models.DTOs;
-using ECommerce.Repository;
+using ECommerce.Services.Interface;
+using ECommerce.Tokens;
+using ECommerce.Tokens.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,21 +18,21 @@ namespace ECommerce.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
-        private readonly ITokenRepository tokenProviderService;
+        private readonly ITokenCreator tokenCreator;
         private readonly IStringLocalizer<AuthController> localizer;
-        private readonly ICustomerRepository customerRepositoryService;
+        private readonly ICustomerService customerRepositoryService;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="userManager"></param>
-        /// <param name="tokenProviderService"></param>
+        /// <param name="tokenCreator"></param>
         /// <param name="localizer"></param>
         /// <param name="customerRepositoryService"></param>
-        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenProviderService, IStringLocalizer<AuthController> localizer, ICustomerRepository customerRepositoryService)
+        public AuthController(UserManager<IdentityUser> userManager, ITokenCreator tokenCreator, IStringLocalizer<AuthController> localizer, ICustomerService customerRepositoryService)
         {
             this.userManager = userManager;
-            this.tokenProviderService = tokenProviderService;
+            this.tokenCreator = tokenCreator;
             this.localizer = localizer;
             this.customerRepositoryService = customerRepositoryService;
         }
@@ -106,7 +108,7 @@ namespace ECommerce.Controllers
                         var roles = await userManager.GetRolesAsync(user);
                         if (roles != null)
                         {
-                            var jwtToken = tokenProviderService.CreateJwtToken(user, roles.ToList());
+                            var jwtToken = tokenCreator.CreateJwtToken(user, roles.ToList());
                             return Ok(new { jwtToken, CustomerId = user.Id, CustomerEmail = user.Email });
                         }
                     }
