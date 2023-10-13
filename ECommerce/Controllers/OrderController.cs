@@ -28,7 +28,11 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="customerId">Guid</param>
         /// <returns>Returns 200Ok response with List(OrderDto) if orders are found otherwise returns 404NotFound</returns>
+        /// <response code="200">Returns List of OrderDto when there are orders present on customerId</response>
+        /// <response code="404">Returns Not found when there are no orders present or the customerId does not exist</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("{customerId}")]
+        [ProducesResponseType(typeof(List<OrderDto>), 200)]
         public async Task<IActionResult> GetOrders([FromRoute] Guid customerId)
         {
             try
@@ -38,7 +42,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -47,7 +54,11 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="orderId">Guid</param>
         /// <returns>Returns 200Ok response with OrderDto if the Order exists otherwise 404NotFound</returns>
+        /// <response code="200">Returns OrderDto when successfully found</response>
+        /// <response code="404">Returns Not found when the order with given id is not found</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("GetOrder/{orderId}")]
+        [ProducesResponseType(typeof(OrderDto), 200)]
         public async Task<IActionResult> GetOrderById([FromRoute] Guid orderId)
         {
             try
@@ -57,7 +68,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -66,7 +80,12 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="createOrderDto">CreateOrderRequestDto Object</param>
         /// <returns>Returns 200Ok response with OrderResultDto if the order is created successfully otherwise 400BadRequest with OrderResultDto</returns>
+        /// <response code="200">Returns OrderResultDto when order created successfully</response>
+        /// <response code="400">Returns OrderResultDto when order creation fails or returns Exception message when an exception occurs</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPost]
+        [ProducesResponseType(typeof(OrderResultDto), 200)]
+        [ProducesErrorResponseType(typeof(OrderResultDto))]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto createOrderDto)
         {
             try
@@ -76,7 +95,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -85,7 +107,12 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="orderId">Guid</param>
         /// <returns>Returns 200Ok response with OrderResultDto if the order is cancelled successfully otherwise 400BadRequest with OrderResultDto</returns>
+        /// <response code="200">Returns OrderResultDto when order created successfully</response>
+        /// <response code="400">Returns OrderResultDto when order creation fails</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPut("Cancel/{orderId}")]
+        [ProducesResponseType(typeof(OrderResultDto), 200)]
+        [ProducesErrorResponseType(typeof(OrderResultDto))]
         public async Task<IActionResult> CancelOrder([FromRoute] Guid orderId)
         {
             try
@@ -95,7 +122,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -104,7 +134,12 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="orderId">Guid</param>
         /// <returns>Returns 200Ok response with OrderResultDto if the order is returned successfully otherwise 400BadRequest with OrderResultDto</returns>
+        /// <response code="200">Returns OrderResultDto when order created successfully</response>
+        /// <response code="400">Returns OrderResultDto when order creation fails</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPut("Return/{orderId}")]
+        [ProducesResponseType(typeof(OrderResultDto), 200)]
+        [ProducesErrorResponseType(typeof(OrderResultDto))]
         //This API will change the status of the order to returned
         public async Task<IActionResult> ReturnOrder([FromRoute] Guid orderId)
         {
@@ -115,7 +150,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
     }

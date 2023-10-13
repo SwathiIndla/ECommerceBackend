@@ -33,7 +33,11 @@ namespace ECommerce.Controllers
         /// <param name="search">string</param>
         /// <param name="page">int</param>
         /// <returns>Returns 200Ok response with PaginatedSearchResultsDto if the products exist which contain the search string otherwise 404NotFound</returns>
+        /// <response code="200">Returns List of PaginatedSearchResultsDto if products are found with search query</response>
+        /// <response code="404">Returns Not found when no products are found with the search query</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet]
+        [ProducesResponseType(typeof(PaginatedSearchResultsDto), 200)]
         public async Task<IActionResult> SearchProducts([FromQuery] SortProductsDto sortConditions, [FromQuery] string? search = null, [FromQuery] int page = 1)
         {
             try
@@ -43,7 +47,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
     }

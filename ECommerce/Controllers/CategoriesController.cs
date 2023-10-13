@@ -32,7 +32,10 @@ namespace ECommerce.Controllers
         /// Gets the complete categories Hierarchy
         /// </summary>
         /// <returns>Returns 200Ok response with List(CategoryDto)</returns>
+        /// <response code="200">Returns the list of CategoryDto</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("hierarchy")]
+        [ProducesResponseType(typeof(List<CategoryDto>), 200)]
         public async Task<IActionResult> GetCategoriesHierarchy()
         {
             try
@@ -43,7 +46,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -52,7 +58,10 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="categoryId">Guid</param>
         /// <returns>Returns 200Ok response with List(PropertyNameValueDto)</returns>
+        /// <response code="200">Returns the List of PropertyNameValueDto</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("properties/{categoryId}")]
+        [ProducesResponseType(typeof(List<PropertyNameValueDto>), 200)]
         public async Task<IActionResult> GetPropertiesOfCategory([FromRoute] Guid categoryId)
         {
             try
@@ -63,7 +72,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -72,7 +84,10 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="categoryId">Guid</param>
         /// <returns>Returns 200Ok response with List(BrandDto)</returns>
+        /// <response code="200">Returns List of BrandDto</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("brands/{categoryId}")]
+        [ProducesResponseType(typeof(List<BrandDto>), 200)]
         public async Task<IActionResult> GetBrandsOfCategory([FromRoute] Guid categoryId)
         {
             try
@@ -83,7 +98,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
     }

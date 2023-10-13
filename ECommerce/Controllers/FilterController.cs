@@ -31,7 +31,11 @@ namespace ECommerce.Controllers
         /// <param name="filterConditions">FilterProductsQueryParametersDto Object</param>
         /// <param name="sortConditions">SortProductsDto object</param>
         /// <returns>Returns 200Ok response with List(PaginatedFilteredResults) if products are found with the given conditions otherwise 404NotFound</returns>
+        /// <response code="200">Returns List of PaginatedFilterResults if products are found with filter conditions</response>
+        /// <response code="404">Returns Not found when no products are found with the filter conditions</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("{categoryId}")]
+        [ProducesResponseType(typeof(PaginatedFilterResults), 200)]
         public async Task<IActionResult> GetProductCards([FromRoute] Guid categoryId ,[FromQuery] FilterProductsQueryParametersDto filterConditions, [FromQuery] SortProductsDto sortConditions)
         {
             try
@@ -41,7 +45,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
     }

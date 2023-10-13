@@ -29,7 +29,11 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="customerId">Id of the customer</param>
         /// <returns>Returns 200Ok response with List(AddressDto) if addresses are present otherwise returns 204NoContent</returns>
+        /// <response code="200">Returns List of Address of the Customer</response>
+        /// <response code="204">Returns 204 No Content if no address is found or the customer is not found</response>
+        /// <response code="500">Returns Internal server error with the Message when exception occurs</response>
         [HttpGet("{customerId}")]
+        [ProducesResponseType(typeof(List<AddressDto>), 200)]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetAddresses([FromRoute] Guid customerId)
         {
@@ -40,7 +44,7 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode( StatusCodes.Status500InternalServerError, (new { ex.Message }));
             }
         }
 
@@ -49,7 +53,11 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="addressDto">AddAddressRequestDto object</param>
         /// <returns>If address is created successfully returns a 200OK response with AddressDto otherwise returns 400BadRequest</returns>
+        /// <response code="200">Returns the New Address that is added</response>
+        /// <response code="400">Returns Bad Request when the new address addition fails</response>
+        /// <response code="500">Returns Internal server error with the Message when exception occurs</response>
         [HttpPost]
+        [ProducesResponseType(typeof(AddressDto), 200)]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> AddAddress([FromBody] AddAddressRequestDto addressDto)
         {
@@ -60,7 +68,7 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new { ex.Message }));
             }
         }
 
@@ -69,7 +77,11 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="updatedAddressDto">AddressDto object</param>
         /// <returns>Returns 200OK response with AddressDto if the address is found and updated successfully otherwise returns 404NotFound</returns>
+        /// <response code="200">Returns the updated address details when the updation is successful</response>
+        /// <response code="404">Returns Not Found status code when the address is not found</response>
+        /// <response code="500">Returns Internal server error with Message when an exception occurs</response>
         [HttpPut]
+        [ProducesResponseType(typeof (AddressDto), 200)]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> UpdateAddress([FromBody] AddressDto updatedAddressDto)
         {
@@ -80,7 +92,7 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new { ex.Message }));
             }
         }
 
@@ -89,6 +101,9 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="addressId">A Guid</param>
         /// <returns>Returns 200Ok response if the action is successful otherwise a 400BadRequest is sent</returns>
+        /// <response code="200">Returns Ok response if the address is set to default successfully</response>
+        /// <response code="400">Returns Bad request if the address is not set to default</response>
+        /// <response code="500">Returns Internal server error with Message when an exception occurs</response>
         [HttpPut("SetDefault/{addressId}")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> SetDefaultAddress([FromRoute] Guid addressId)
@@ -100,7 +115,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -109,6 +127,9 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="addressId">Guid</param>
         /// <returns>Returns 200OK response if deletion is successful otherwise 400BadRequest</returns>
+        /// <response code="200">Returns Ok response when the address is deleted successfully</response>
+        /// <response code="400">Returns Bad request when the address deletion fails</response>
+        /// <response code="500">Returns Internal server error with Message when an exception occurs</response>
         [HttpDelete("{addressId}")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> DeleteAddress([FromRoute] Guid addressId)
@@ -120,7 +141,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
     }

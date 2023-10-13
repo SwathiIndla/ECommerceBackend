@@ -42,6 +42,9 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="registerRequestDto">RegisterRequestDto Object</param>
         /// <returns>Returns 200OK response with a Message,CustomerId,EmailID in an object if creation is successful otherwise 400BadRequest with a Message,Error in a object</returns>
+        /// <response code="200">Returns a Message, CustomerId, EmailId of the newly created user</response>
+        /// <response code="400">Returns a Bad request with a Message, when the user creation fails</response>
+        /// <response code="500">Returns Internal server error with Error and Details when an exception occurs</response>
         [HttpPost("signup")]
         public async Task<IActionResult> Signup([FromBody] RegisterRequestDto registerRequestDto)
         {
@@ -85,7 +88,11 @@ namespace ECommerce.Controllers
             catch (Exception ex)
             {
                 await userManager.DeleteAsync(identityUser);
-                return BadRequest(new { Error = ex.Message, Details = ex.ToString() });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    Error = ex.Message,
+                    Details = ex.ToString()
+                }));
             }
         }
 
@@ -94,6 +101,9 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="loginRequestDto">LoginRequestDto object</param>
         /// <returns>Returns a 2000k response with jwtToken, CustomerId and CustomerEmail as an object otherwise a 400BadRequest</returns>
+        /// <response code="200">Returns the JwtToken, CustomerId, CustomerEmail when the login is successful</response>
+        /// <response code="400">Returns Bad request with a message when the login is not successful</response>
+        /// <response code="500">Returns Internal server error with Error and Details when an exception occurs</response>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
@@ -118,7 +128,11 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Error = ex.Message, Details = ex.ToString() });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    Error = ex.Message,
+                    Details = ex.ToString()
+                }));
             }
         }
 
@@ -127,6 +141,9 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="details">GetUserByEmailDto object</param>
         /// <returns>Returns 200Ok response if the User exists otherwise 404NotFound</returns>
+        /// <response code="200">Returns Ok response when the user is found</response>
+        /// <response code="404">Returns Not found when the user is not found</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPost("find-user")]
         public async Task<IActionResult> GetUserByEmail([FromBody] GetUserByEmailDto details)
         {
@@ -137,7 +154,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -146,6 +166,10 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="newDetails">LoginRequestDto object</param>
         /// <returns>Returns 200Ok response if password is reset successfully otherwise 400BadRequest both the responses will have an object with Message key</returns>
+        /// <response code="200">Returns Ok response with a message when the password is reset successfully</response>
+        /// <response code="404">Returns Not found if the user with the given email is not found</response>
+        /// <response code="400">Returns Bad request with message when an the password reset is not successful </response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPut("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] LoginRequestDto newDetails)
         {
@@ -165,7 +189,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 

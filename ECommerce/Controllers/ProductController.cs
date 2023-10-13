@@ -29,7 +29,11 @@ namespace ECommerce.Controllers
         /// </summary>
         /// <param name="productItemId">Guid</param>
         /// <returns>Returns 200Ok response with ProductItemDetailedPageDto if the productItem exists otherwise returns 404NotFound</returns>
+        /// <response code="200">Returns ProductItemDetailedPageDto when successfully found</response>
+        /// <response code="404">Returns Not found when the order with given id is not found</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("{productItemId}")]
+        [ProducesResponseType(typeof(ProductItemDetailedPageDto),200)]
         public async Task<IActionResult> GetDetailedProductItem([FromRoute] Guid productItemId)
         {
             try
@@ -39,7 +43,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
 
@@ -50,7 +57,11 @@ namespace ECommerce.Controllers
         /// <param name="filterConditions">FilterVariantParametersDto object</param>
         /// <param name="featuresDataNeeded">a list of strings</param>
         /// <returns>Returns 200Ok response with ProductVariantDetailedPageDto if the productItems exist otherwise 404NotFound</returns>
+        /// <response code="200">Returns ProductVariantDetailedPageDto when successfully found</response>
+        /// <response code="404">Returns Not found when the order with given id is not found</response>
+        /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("variant/{productId}")]
+        [ProducesResponseType(typeof(ProductVariantDetailedPageDto),200)]
         public async Task<IActionResult> GetProductVariantDetails([FromRoute] Guid productId, [FromQuery] FilterVariantParametersDto filterConditions, [FromQuery] List<string> featuresDataNeeded)
         {
             try
@@ -60,7 +71,10 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, (new
+                {
+                    ex.Message
+                }));
             }
         }
     }
