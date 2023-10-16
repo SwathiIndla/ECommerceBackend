@@ -13,6 +13,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using System.Net;
 
 namespace ECommerce_WebAPI.UnitTests.Controllers
 {
@@ -109,14 +110,16 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Signup_ShouldReturnBadRequest_WhenAnExceptionOccurs()
+        public async Task Signup_ShouldInternalServerError_WhenAnExceptionOccurs()
         {
             var registerRequestDto = fixture.Create<RegisterRequestDto>();
             userManagerMock.Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).Throws<Exception>();
 
             var result = await sut.Signup(registerRequestDto).ConfigureAwait(false);
 
-            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<ObjectResult>(result);
+            var statusCodeResult = (ObjectResult)result;
+            Assert.Equal((int)HttpStatusCode.InternalServerError, statusCodeResult.StatusCode);
             result.Should().NotBeNull();
             userManagerMock.Verify(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()), Times.Once);
         }
@@ -181,14 +184,16 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task Login_ShouldReturnBadRequest_WhenExceptionOccurs()
+        public async Task Login_ShouldReturnInternalServerError_WhenExceptionOccurs()
         {
             var loginRequestDto = fixture.Create<LoginRequestDto>();
             userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).Throws<Exception>();
 
             var result = await sut.Login(loginRequestDto).ConfigureAwait(false);
 
-            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<ObjectResult>(result);
+            var statusCodeResult = (ObjectResult)result;
+            Assert.Equal((int)HttpStatusCode.InternalServerError, statusCodeResult.StatusCode);
             result.Should().NotBeNull();
             userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Once);
         }
@@ -223,7 +228,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetUserByEmail_ShouldReturnBadRequest_WhenExceptionOccurs()
+        public async Task GetUserByEmail_ShouldReturnInternalServerError_WhenExceptionOccurs()
         {
             var getUserByEmail = fixture.Create<GetUserByEmailDto>();
 
@@ -231,7 +236,9 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
 
             var result = await sut.GetUserByEmail(getUserByEmail).ConfigureAwait(false);
 
-            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<ObjectResult>(result);
+            var statusCodeResult = (ObjectResult)result;
+            Assert.Equal((int)HttpStatusCode.InternalServerError, statusCodeResult.StatusCode);
             result.Should().NotBeNull();
         }
 
