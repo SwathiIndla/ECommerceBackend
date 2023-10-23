@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using System.Text;
+using System.Text.Json;
 
 namespace ECommerce.Controllers
 {
@@ -159,6 +161,21 @@ namespace ECommerce.Controllers
                     ex.Message
                 }));
             }
+            //try
+            //{
+            //    using(HttpClient httpClient = new HttpClient())
+            //    {
+            //        httpClient.BaseAddress = new Uri("https://localhost:7025/");
+            //        var jsonData = JsonSerializer.Serialize(new { Email = details.Email });
+            //        var postData = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            //        HttpResponseMessage response = await httpClient.PostAsync("api/Auth/find-user-by-email", postData);
+            //        return response.IsSuccessStatusCode ? Ok() : response.StatusCode == System.Net.HttpStatusCode.NotFound ? NotFound() : StatusCode(StatusCodes.Status500InternalServerError);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    return StatusCode(StatusCodes.Status500InternalServerError, new { ex.Message });
+            //}
         }
 
         /// <summary>
