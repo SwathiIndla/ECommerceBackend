@@ -1,5 +1,6 @@
 ﻿using ECommerce.Models.DTOs;
 using ECommerce.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,6 +33,7 @@ namespace ECommerce.Controllers
         /// <response code="404">Returns Not found when there are no orders present or the customerId does not exist</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("{customerId}")]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(List<OrderDto>), 200)]
         public async Task<IActionResult> GetOrders([FromRoute] Guid customerId)
         {
@@ -58,6 +60,7 @@ namespace ECommerce.Controllers
         /// <response code="404">Returns Not found when the order with given id is not found</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("GetOrder/{orderId}")]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(OrderDto), 200)]
         public async Task<IActionResult> GetOrderById([FromRoute] Guid orderId)
         {
@@ -84,6 +87,7 @@ namespace ECommerce.Controllers
         /// <response code="400">Returns OrderResultDto when order creation fails or returns Exception message when an exception occurs</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPost]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(OrderResultDto), 200)]
         [ProducesErrorResponseType(typeof(OrderResultDto))]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto createOrderDto)
@@ -111,6 +115,7 @@ namespace ECommerce.Controllers
         /// <response code="400">Returns OrderResultDto when order creation fails</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPut("Cancel/{orderId}")]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(OrderResultDto), 200)]
         [ProducesErrorResponseType(typeof(OrderResultDto))]
         public async Task<IActionResult> CancelOrder([FromRoute] Guid orderId)
@@ -138,6 +143,7 @@ namespace ECommerce.Controllers
         /// <response code="400">Returns OrderResultDto when order creation fails</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPut("Return/{orderId}")]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(OrderResultDto), 200)]
         [ProducesErrorResponseType(typeof(OrderResultDto))]
         //This API will change the status of the order to returned

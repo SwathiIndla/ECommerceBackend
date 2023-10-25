@@ -1,5 +1,6 @@
 ﻿using ECommerce.Models.DTOs;
 using ECommerce.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,6 +33,7 @@ namespace ECommerce.Controllers
         /// <response code="400">Returns Bad request when review is not added</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPost]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(ReviewDto), 200)]
         public async Task<IActionResult> AddReview([FromBody] AddReviewRequestDto reviewRequestDto)
         {
@@ -58,6 +60,7 @@ namespace ECommerce.Controllers
         /// <response code="200">Returns an object with IsAvailable flag and a ReviewDto review property where review will be null if review is not present</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("IsReviewPresent/{customerId}/{productId}")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> IsReviewPresent([FromRoute] Guid customerId, [FromRoute] Guid productId)
         {
             try
@@ -83,6 +86,7 @@ namespace ECommerce.Controllers
         /// <response code="400">Returns Bad request when review is not edited</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPut]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof (ReviewDto), 200)]
         public async Task<IActionResult> EditReview([FromBody] EditReviewRequestDto editReviewRequestDto)
         {
@@ -109,6 +113,7 @@ namespace ECommerce.Controllers
         /// <response code="400">Returns Bad request when review is not deleted</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpDelete("{productReviewId}")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> DeleteReview([FromRoute] Guid productReviewId)
         {
             try
@@ -163,6 +168,7 @@ namespace ECommerce.Controllers
         /// <response code="404">Returns Not found when product is not reviewable by customer</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("IsProductReviewable/{customerId}/{productId}")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> IsProductReviewable([FromRoute] Guid customerId, [FromRoute] Guid productId)
         {
             try
