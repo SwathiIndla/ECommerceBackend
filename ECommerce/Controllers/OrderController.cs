@@ -1,5 +1,6 @@
 ﻿using ECommerce.Models.DTOs;
 using ECommerce.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,8 +31,11 @@ namespace ECommerce.Controllers
         /// <returns>Returns 200Ok response with List(OrderDto) if orders are found otherwise returns 404NotFound</returns>
         /// <response code="200">Returns List of OrderDto when there are orders present on customerId</response>
         /// <response code="404">Returns Not found when there are no orders present or the customerId does not exist</response>
+        /// <response code="401">Returns Unauthorized Status code when the token sent is invalid or when token is missing</response>
+        /// <response code="403">Returns Forbidden Status code when the logged in user does not have Customer role</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("{customerId}")]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(List<OrderDto>), 200)]
         public async Task<IActionResult> GetOrders([FromRoute] Guid customerId)
         {
@@ -56,8 +60,11 @@ namespace ECommerce.Controllers
         /// <returns>Returns 200Ok response with OrderDto if the Order exists otherwise 404NotFound</returns>
         /// <response code="200">Returns OrderDto when successfully found</response>
         /// <response code="404">Returns Not found when the order with given id is not found</response>
+        /// <response code="401">Returns Unauthorized Status code when the token sent is invalid or when token is missing</response>
+        /// <response code="403">Returns Forbidden Status code when the logged in user does not have Customer role</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpGet("GetOrder/{orderId}")]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(OrderDto), 200)]
         public async Task<IActionResult> GetOrderById([FromRoute] Guid orderId)
         {
@@ -82,8 +89,11 @@ namespace ECommerce.Controllers
         /// <returns>Returns 200Ok response with OrderResultDto if the order is created successfully otherwise 400BadRequest with OrderResultDto</returns>
         /// <response code="200">Returns OrderResultDto when order created successfully</response>
         /// <response code="400">Returns OrderResultDto when order creation fails or returns Exception message when an exception occurs</response>
+        /// <response code="401">Returns Unauthorized Status code when the token sent is invalid or when token is missing</response>
+        /// <response code="403">Returns Forbidden Status code when the logged in user does not have Customer role</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPost]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(OrderResultDto), 200)]
         [ProducesErrorResponseType(typeof(OrderResultDto))]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto createOrderDto)
@@ -109,8 +119,11 @@ namespace ECommerce.Controllers
         /// <returns>Returns 200Ok response with OrderResultDto if the order is cancelled successfully otherwise 400BadRequest with OrderResultDto</returns>
         /// <response code="200">Returns OrderResultDto when order created successfully</response>
         /// <response code="400">Returns OrderResultDto when order creation fails</response>
+        /// <response code="401">Returns Unauthorized Status code when the token sent is invalid or when token is missing</response>
+        /// <response code="403">Returns Forbidden Status code when the logged in user does not have Customer role</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPut("Cancel/{orderId}")]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(OrderResultDto), 200)]
         [ProducesErrorResponseType(typeof(OrderResultDto))]
         public async Task<IActionResult> CancelOrder([FromRoute] Guid orderId)
@@ -136,8 +149,11 @@ namespace ECommerce.Controllers
         /// <returns>Returns 200Ok response with OrderResultDto if the order is returned successfully otherwise 400BadRequest with OrderResultDto</returns>
         /// <response code="200">Returns OrderResultDto when order created successfully</response>
         /// <response code="400">Returns OrderResultDto when order creation fails</response>
+        /// <response code="401">Returns Unauthorized Status code when the token sent is invalid or when token is missing</response>
+        /// <response code="403">Returns Forbidden Status code when the logged in user does not have Customer role</response>
         /// <response code="500">Returns Internal Server Error with Message when an exception occurs</response>
         [HttpPut("Return/{orderId}")]
+        [Authorize(Roles = "Customer")]
         [ProducesResponseType(typeof(OrderResultDto), 200)]
         [ProducesErrorResponseType(typeof(OrderResultDto))]
         //This API will change the status of the order to returned
