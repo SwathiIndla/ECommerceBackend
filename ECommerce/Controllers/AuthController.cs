@@ -253,33 +253,33 @@ namespace ECommerce.Controllers
         [HttpPost("find-user")]
         public async Task<IActionResult> GetUserByEmail([FromBody] GetUserByEmailDto details)
         {
-            try
-            {
-                var user = await userManager.FindByEmailAsync(details.Email);
-                return user != null ? Ok() : NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, (new
-                {
-                    ex.Message
-                }));
-            }
             //try
             //{
-            //    using(HttpClient httpClient = new HttpClient())
-            //    {
-            //        httpClient.BaseAddress = new Uri("https://localhost:7025/");
-            //        var jsonData = JsonSerializer.Serialize(new { Email = details.Email });
-            //        var postData = new StringContent(jsonData, Encoding.UTF8, "application/json");
-            //        HttpResponseMessage response = await httpClient.PostAsync("api/Auth/find-user-by-email", postData);
-            //        return response.IsSuccessStatusCode ? Ok() : response.StatusCode == System.Net.HttpStatusCode.NotFound ? NotFound() : StatusCode(StatusCodes.Status500InternalServerError);
-            //    }
+            //    var user = await userManager.FindByEmailAsync(details.Email);
+            //    return user != null ? Ok() : NotFound();
             //}
             //catch (Exception ex)
             //{
-            //    return StatusCode(StatusCodes.Status500InternalServerError, new { ex.Message });
+            //    return StatusCode(StatusCodes.Status500InternalServerError, (new
+            //    {
+            //        ex.Message
+            //    }));
             //}
+            try
+            {
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri("https://localhost:7025/");
+                    var jsonData = JsonSerializer.Serialize(new { Email = details.Email });
+                    var postData = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await httpClient.PostAsync("api/Auth/find-user-by-email", postData);
+                    return response.IsSuccessStatusCode ? Ok() : response.StatusCode == System.Net.HttpStatusCode.NotFound ? NotFound() : StatusCode(StatusCodes.Status500InternalServerError);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { ex.Message });
+            }
         }
 
         /// <summary>
