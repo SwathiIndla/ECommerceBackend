@@ -4,6 +4,6 @@ namespace ECommerce.Tokens.Interface
 {
     public interface ITokenCreator
     {
-        string CreateJwtToken(IdentityUser identityUser, List<string> roles);
+        string CreateJwtToken(string email, List<string> roles);
     }
 }

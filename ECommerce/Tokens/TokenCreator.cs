@@ -18,10 +18,10 @@ namespace ECommerce.Tokens
             this.configuration = configuration;
         }
 
-        public string CreateJwtToken(IdentityUser identityUser, List<string> roles)
+        public string CreateJwtToken(string email, List<string> roles)
         {
             var claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.Email, identityUser.Email ?? ""));
+            claims.Add(new Claim(ClaimTypes.Email, email));
 
             foreach (var role in roles)
             {
