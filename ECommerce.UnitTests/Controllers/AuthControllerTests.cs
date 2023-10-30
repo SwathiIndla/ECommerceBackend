@@ -65,7 +65,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
         public async Task Signup_ShouldReturnBadRequest_WhenRolesAreNotProvided()
         {
             var registerRequestDto = fixture.Create<RegisterRequestDto>();
-            registerRequestDto.Roles = new string[] { };
+            registerRequestDto.Roles = Array.Empty<string>();
             var objectResult = new { Message = "Roles cannot be empty while registering a user. A default role 'Customer' must be assigned." };
             localizerMock.Setup(loc => loc["EmptyRoles"]).Returns(new LocalizedString("EmptyRoles", "Roles cannot be empty while registering a user. A default role 'Customer' must be assigned."));
 
@@ -138,7 +138,7 @@ namespace ECommerce_WebAPI.UnitTests.Controllers
             userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
             userManagerMock.Setup(x => x.CheckPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).ReturnsAsync(true);
             userManagerMock.Setup(x => x.GetRolesAsync(It.IsAny<IdentityUser>())).ReturnsAsync(roles);
-            tokenCreatorMock.Setup(x => x.CreateJwtToken(It.IsAny<IdentityUser>(), It.IsAny<List<string>>())).Returns(jwtToken);
+            tokenCreatorMock.Setup(x => x.CreateJwtToken(It.IsAny<string>(), It.IsAny<List<string>>())).Returns(jwtToken);
 
             var result = await sut.Login(loginRequestDto).ConfigureAwait(false);
 

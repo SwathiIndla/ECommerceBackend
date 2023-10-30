@@ -19,6 +19,7 @@ namespace ECommerce.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly UserManager<IdentityUser> userManager;
         private readonly ITokenCreator tokenCreator;
         private readonly IStringLocalizer<AuthController> localizer;
         private readonly ICustomerService customerRepositoryService;
@@ -27,14 +28,16 @@ namespace ECommerce.Controllers
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="userManager"></param>
         /// <param name="tokenCreator"></param>
         /// <param name="localizer"></param>
         /// <param name="customerRepositoryService"></param>
-        public AuthController(ITokenCreator tokenCreator, IStringLocalizer<AuthController> localizer, ICustomerService customerRepositoryService)
+        public AuthController(UserManager<IdentityUser> userManager, ITokenCreator tokenCreator, IStringLocalizer<AuthController> localizer, ICustomerService customerRepositoryService)
         {
             this.tokenCreator = tokenCreator;
             this.localizer = localizer;
             this.customerRepositoryService = customerRepositoryService;
+            this.userManager = userManager;
         }
 
         /// <summary>
