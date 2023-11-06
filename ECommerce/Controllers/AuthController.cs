@@ -53,7 +53,11 @@ namespace ECommerce.Controllers
         {
             try
             {
-                if(registerRequestDto.Roles.Any() && registerRequestDto.Roles != null && registerRequestDto.Roles.Length > 0)
+                var emailData = Convert.FromBase64String(registerRequestDto.Email);
+                registerRequestDto.Email = Encoding.UTF8.GetString(emailData);
+                var passwordData = Convert.FromBase64String(registerRequestDto.Password);
+                registerRequestDto.Password = Encoding.UTF8.GetString(passwordData);
+                if (registerRequestDto.Roles.Any() && registerRequestDto.Roles != null && registerRequestDto.Roles.Length > 0)
                 {
                     using HttpClient httpClient = new();
                     httpClient.BaseAddress = new Uri(AuthMicroserviceBaseUrl);
@@ -122,6 +126,10 @@ namespace ECommerce.Controllers
         {
             try
             {
+                var emailData = Convert.FromBase64String(loginRequestDto.Email);
+                loginRequestDto.Email = Encoding.UTF8.GetString(emailData);
+                var passwordData = Convert.FromBase64String(loginRequestDto.Password);
+                loginRequestDto.Password = Encoding.UTF8.GetString(passwordData);
                 using HttpClient httpClient = new();
                 httpClient.BaseAddress = new Uri(AuthMicroserviceBaseUrl);
                 var jsonData = JsonSerializer.Serialize(new { loginRequestDto.Email });
@@ -178,6 +186,8 @@ namespace ECommerce.Controllers
         {
             try
             {
+                var emailData = Convert.FromBase64String(details.Email);
+                details.Email = Encoding.UTF8.GetString(emailData);
                 using HttpClient httpClient = new();
                 httpClient.BaseAddress = new Uri(AuthMicroserviceBaseUrl);
                 var jsonData = JsonSerializer.Serialize(new { details.Email });
@@ -216,6 +226,10 @@ namespace ECommerce.Controllers
         {
             try
             {
+                var emailData = Convert.FromBase64String(newDetails.Email);
+                newDetails.Email = Encoding.UTF8.GetString(emailData);
+                var passwordData = Convert.FromBase64String(newDetails.Password);
+                newDetails.Password = Encoding.UTF8.GetString(passwordData);
                 var resultMessage = "";
                 using HttpClient httpClient = new();
                 httpClient.BaseAddress = new Uri(AuthMicroserviceBaseUrl);
