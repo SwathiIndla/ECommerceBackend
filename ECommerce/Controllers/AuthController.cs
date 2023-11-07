@@ -157,7 +157,7 @@ namespace ECommerce.Controllers
                                 if (idResponse.IsSuccessStatusCode)
                                 {
                                     var jwtToken = tokenCreator.CreateJwtToken(customer.email, roles);
-                                    return Ok(new { jwtToken, CustomerId = customer.id, CustomerEmail = customer.email });
+                                    return Ok(new { jwtToken, CustomerId = customer.id, CustomerEmail = customer.email, Roles = roles });
                                 }
                             }
                         }
@@ -253,5 +253,20 @@ namespace ECommerce.Controllers
             }
         }
 
+        [HttpPut("add-seller/{customerId}")]
+        public async Task<IActionResult> AddSeller([FromRoute] Guid customerId)
+        {
+            try
+            {
+                using HttpClient httpClient = new();
+                httpClient.BaseAddress = new Uri(AuthMicroserviceBaseUrl);
+                HttpResponseMessage response = await httpClient.PutAsync($"api/Auth/add-role/{customerId}", null);
+                return response.IsSuccessStatusCode ? Ok() : BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { ex.Message });
+            }
+        }
     }
 }
