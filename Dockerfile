@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
 
 # Copy the .csproj and restore dependencies (optimizing caching)
-COPY *.cs ./
+COPY program.cs ./
 RUN dotnet restore
 
 # Copy the remaining application code
