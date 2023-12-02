@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy the .csproj and restore dependencies (optimizing caching)
 COPY /ECommerce/Program.cs /app/
-RUN dotnet restore
+#RUN dotnet restore
 
 # Copy the remaining application code
 COPY . ./
