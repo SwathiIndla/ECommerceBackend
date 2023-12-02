@@ -12,7 +12,7 @@ COPY /ECommerce/Program.cs /app/
 COPY . ./
 
 # Build the application inside the container
-RUN dotnet publish -c Release -o out
+#RUN dotnet publish -c Release -o out
 
 # Create a runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
