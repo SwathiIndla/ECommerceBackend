@@ -1,5 +1,5 @@
 # Use the .NET Core SDK as the base image for building the application
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:Microsoft.NET.Sdk.Web AS build-env
 
 # Set the working directory inside the container
 WORKDIR /app
