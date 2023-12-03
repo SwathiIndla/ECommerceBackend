@@ -6,10 +6,11 @@ WORKDIR /app
 
 # Copy the .csproj and restore dependencies (optimizing caching)
 COPY Program.cs /app/
+COPY . ./
 RUN dotnet restore
 
 # Copy the remaining application code
-COPY . ./
+
 
 # Build the application inside the container
 RUN dotnet publish -c Release -o out
