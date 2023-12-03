@@ -6,9 +6,10 @@ WORKDIR /app
 
 # Copy the .csproj and restore dependencies (optimizing caching)
 COPY ECommerce/Program.cs /app/
-COPY . ./
 COPY ECommerce/ECommerce.csproj /app/ECommerce/
 COPY ECommerce.UnitTests/ECommerce.UnitTests.csproj /app/ECommerce.UnitTests/
+COPY ECommerce/ .
+COPY Ecommerce.UnitTests/ .
 
 RUN dotnet restore
 
