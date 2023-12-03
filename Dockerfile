@@ -9,7 +9,7 @@ COPY ECommerce/Program.cs /app/
 COPY ECommerce/ECommerce.csproj /app/ECommerce/
 COPY ECommerce.UnitTests/ECommerce.UnitTests.csproj /app/ECommerce.UnitTests/
 COPY ECommerce/ .
-COPY Ecommerce.UnitTests/ .
+#COPY Ecommerce.UnitTests/ .
 
 RUN dotnet restore
 
