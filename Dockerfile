@@ -15,7 +15,7 @@ RUN dotnet restore
 
 # Copy the remaining application code
 COPY . ./
-
+ 
 # Build the application inside the container
 RUN dotnet publish -c Release -o out
 
