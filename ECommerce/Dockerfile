@@ -5,12 +5,15 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
 
 # Copy the .csproj and restore dependencies (optimizing caching)
-COPY Program.cs /app/
+COPY ECommerce/Program.cs /app/
 COPY . ./
+COPY ECommerce/ECommerce.csproj /app/ECommerce/
+COPY ECommerce.UnitTests/ECommerce.UnitTests.csproj /app/ECommerce.UnitTests/
+
 RUN dotnet restore
 
 # Copy the remaining application code
-
+COPY . ./
 
 # Build the application inside the container
 RUN dotnet publish -c Release -o out
