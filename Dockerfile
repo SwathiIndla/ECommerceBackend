@@ -6,13 +6,13 @@ WORKDIR /app
 
 # Copy the .csproj and restore dependencies (optimizing caching)
 COPY /ECommerce/Program.cs /app/
-#RUN dotnet restore
+RUN dotnet restore
 
 # Copy the remaining application code
 COPY . ./
 
 # Build the application inside the container
-#RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o out
 
 # Create a runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
